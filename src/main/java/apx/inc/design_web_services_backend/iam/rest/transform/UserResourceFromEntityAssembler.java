@@ -2,8 +2,8 @@ package apx.inc.design_web_services_backend.iam.rest.transform;
 
 import apx.inc.design_web_services_backend.iam.domain.model.aggregates.User;
 import apx.inc.design_web_services_backend.iam.domain.model.entities.Role;
-import apx.inc.design_web_services_backend.iam.rest.resources.CourseJoinCodeResource;
-import apx.inc.design_web_services_backend.iam.rest.resources.CourseResource;
+import apx.inc.design_web_services_backend.shared.interfaces.rest.resources.CourseJoinCodeResource;
+import apx.inc.design_web_services_backend.shared.interfaces.rest.resources.CourseResource;
 import apx.inc.design_web_services_backend.iam.rest.resources.UserResource;
 
 public class UserResourceFromEntityAssembler {

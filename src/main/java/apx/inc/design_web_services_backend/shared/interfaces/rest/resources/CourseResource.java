@@ -1,4 +1,4 @@
-package apx.inc.design_web_services_backend.iam.rest.resources;
+package apx.inc.design_web_services_backend.shared.interfaces.rest.resources;
 
 public record CourseResource(
         Long courseId,
