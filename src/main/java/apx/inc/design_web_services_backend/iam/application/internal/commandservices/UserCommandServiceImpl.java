@@ -98,7 +98,7 @@ public class UserCommandServiceImpl implements UserCommandService {
         if (!belongsToCourse) {
             throw new IllegalArgumentException("User does not belong to the group with ID " + leaveCourseCommand.courseId());
         }
-        user.removeFromGroup(leaveCourseCommand.courseId());
+        user.removeFromCourse(leaveCourseCommand.courseId());
 
         // Save the updated user
         try {

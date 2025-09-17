@@ -196,10 +196,22 @@ public class CourseCommandServiceImpl implements CourseCommandService {
 
         var course=optionalCourse.get();
 
-        //2. Verificar si el nuevo key esta asignado a otro course
 
+        // 2. Verificar si el nuevo código ya está asignado a otro curso
+        var isAssigned = courseRepository.findAll().stream().anyMatch(c->c.getCourseJoinCode().key().equals(setJoinCodeCommand.keycode()));
 
+        if (!isAssigned) {
+            throw new IllegalArgumentException("Course with ID " + setJoinCodeCommand.courseId() + " is already assigned to any course");
+        }
 
+        //3.Actualizar el courseJoinCode
+        var updatedCourseJoinCode=new CourseJoinCode(setJoinCodeCommand.keycode(),setJoinCodeCommand.expiration());
+        var updatedCourse=course.setJoinCode(updatedCourseJoinCode);
+
+        //4. Actualizar el repositorio
+        courseRepository.save(updatedCourse);
+
+        return Optional.of(updatedCourseJoinCode);
 
     }
 
