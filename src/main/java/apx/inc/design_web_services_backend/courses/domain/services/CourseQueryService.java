@@ -13,7 +13,7 @@ import java.util.Optional;
 public interface CourseQueryService {
     List<Course> handle(GetAllCoursesQuery getAllCoursesQuery);
 
-    Optional<Course> handle(GetCourseByIdQuery getCourseByIdQuery);
+    Optional<Course> handle(GetCourseByIdQuery getCourseByIdQuery, Long userId);
 
     Optional<CourseJoinCode> handle(GetCourseJoinCodeById getCourseJoinCodeByIdQuery);
 

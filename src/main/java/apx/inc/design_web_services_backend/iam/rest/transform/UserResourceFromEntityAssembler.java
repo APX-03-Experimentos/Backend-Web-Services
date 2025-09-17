@@ -16,8 +16,7 @@ public class UserResourceFromEntityAssembler {
                         course -> new CourseResource(
                                 course.getId(),
                                 course.getTitle(),
-                                course.getImageUrl(),
-                                new CourseJoinCodeResource(course.getCourseJoinCode().key(),course.getCourseJoinCode().expiration())
+                                course.getImageUrl()
                         )).toList()
         );
     }

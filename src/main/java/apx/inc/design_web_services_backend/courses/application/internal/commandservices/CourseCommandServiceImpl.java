@@ -7,10 +7,12 @@ import apx.inc.design_web_services_backend.courses.domain.services.CourseCommand
 import apx.inc.design_web_services_backend.courses.infrastructure.persistence.jpa.repositories.CourseRepository;
 import apx.inc.design_web_services_backend.iam.domain.model.valueobjects.Roles;
 import apx.inc.design_web_services_backend.iam.infrastructure.persistence.jpa.repositories.UserRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.Optional;
 
+@Service
 public class CourseCommandServiceImpl implements CourseCommandService {
 
     private final CourseRepository courseRepository;
@@ -187,7 +189,7 @@ public class CourseCommandServiceImpl implements CourseCommandService {
 
     @Override
     public Optional<CourseJoinCode> handle(SetJoinCodeCommand setJoinCodeCommand) {
-        //1. Verificar si existe el grupo
+        //1. Verificar si existe el course
         var optionalCourse=courseRepository.findById(setJoinCodeCommand.courseId());
 
         if (optionalCourse.isEmpty()) {
@@ -217,6 +219,22 @@ public class CourseCommandServiceImpl implements CourseCommandService {
 
     @Override
     public Optional<Course> handle(UpdateCourseCommand updateCourseCommand) {
-        return Optional.empty();
+        //1. Verificar si existe el course
+        var optionalCourse=courseRepository.findById(updateCourseCommand.courseId());
+
+        if (optionalCourse.isEmpty()) {
+            throw new IllegalArgumentException("Course with ID " + updateCourseCommand.courseId() + " not found");
+        }
+
+        var course=optionalCourse.get();
+
+        //2. Actualizar el course
+
+        var updatedCourse=course.updateCourse(updateCourseCommand);
+
+        //3. Guardamos en el repositorio
+        courseRepository.save(updatedCourse);
+
+        return  Optional.of(updatedCourse);
     }
 }

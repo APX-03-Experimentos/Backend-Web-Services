@@ -1,0 +1,14 @@
+package apx.inc.design_web_services_backend.courses.interfaces.rest.transform;
+
+import apx.inc.design_web_services_backend.courses.domain.model.commands.SetJoinCodeCommand;
+import apx.inc.design_web_services_backend.courses.interfaces.rest.resources.SetJoinCodeResource;
+
+public class SetJoinCodeCommandFromResourceAssembler {
+    public static SetJoinCodeCommand toCommandFromResource(SetJoinCodeResource resource) {
+        return  new SetJoinCodeCommand(
+                resource.courseId(),
+                resource.keycode(),
+                resource.expiration()
+        );
+    }
+}

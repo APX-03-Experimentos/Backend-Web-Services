@@ -1,6 +1,7 @@
 package apx.inc.design_web_services_backend.courses.domain.model.aggregates;
 
 import apx.inc.design_web_services_backend.courses.domain.model.commands.CreateCourseCommand;
+import apx.inc.design_web_services_backend.courses.domain.model.commands.UpdateCourseCommand;
 import apx.inc.design_web_services_backend.courses.domain.model.valueobjects.CourseJoinCode;
 import apx.inc.design_web_services_backend.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 import jakarta.persistence.Embedded;
@@ -48,6 +49,12 @@ public class Course extends AuditableAbstractAggregateRoot<Course> {
 
     public Course resetJoinCode() {
         this.courseJoinCode = null;
+        return this;
+    }
+
+    public Course updateCourse(UpdateCourseCommand  updateCourseCommand){
+        this.title=updateCourseCommand.title();
+        this.imageUrl=updateCourseCommand.imageUrl();
         return this;
     }
 

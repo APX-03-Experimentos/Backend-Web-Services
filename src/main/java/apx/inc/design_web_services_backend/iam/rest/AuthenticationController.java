@@ -33,7 +33,8 @@ public class AuthenticationController {
     @ApiResponses(
             value = {
                     @ApiResponse(responseCode = "200", description = "User signed in successfully"),
-                    @ApiResponse(responseCode = "400", description = "Invalid credentials"),
+                    @ApiResponse(responseCode = "400", description = "Bad Request - Invalid input data"),
+                    @ApiResponse(responseCode = "404", description = "Not Found - User does not exist"),
             }
     )
     public ResponseEntity<AuthenticatedUserResource> signIn(@RequestBody SignInResource signInResource){
