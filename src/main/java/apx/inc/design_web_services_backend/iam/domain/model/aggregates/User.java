@@ -1,7 +1,6 @@
 package apx.inc.design_web_services_backend.iam.domain.model.aggregates;
 
 import apx.inc.design_web_services_backend.courses.domain.model.aggregates.Course;
-import apx.inc.design_web_services_backend.courses.infrastructure.persistence.jpa.repositories.CourseRepository;
 import apx.inc.design_web_services_backend.iam.domain.model.commands.UpdateUserCommand;
 import apx.inc.design_web_services_backend.iam.domain.model.entities.Role;
 import apx.inc.design_web_services_backend.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
@@ -29,23 +28,23 @@ public class User extends AuditableAbstractAggregateRoot <User>{
 
     @ManyToMany
     @JoinTable(
-            name = "user_courses",
+            name = "student_courses",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "group_id")
     )
-    private Set<Course> userInCourses;
+    private Set<Course> studentInCourses;
 
     protected User(){
         super();
         this.userRoles = new HashSet<>();
-        this.userInCourses= new HashSet<>();
+        this.studentInCourses = new HashSet<>();
     }
 
     public User(String userName, String password){
         this.userName = userName;
         this.password = password;
         this.userRoles = new HashSet<>();
-        this.userInCourses= new HashSet<>();
+        this.studentInCourses = new HashSet<>();
     }
 
     public User(String userName, String password, List<Role> roles) {
@@ -62,14 +61,12 @@ public class User extends AuditableAbstractAggregateRoot <User>{
     }
 
     //
-    public void assignToGroup(Long courseId, CourseRepository courseRepository) {
-        Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new IllegalArgumentException("Course not found with id: " + courseId));
-        this.userInCourses.add(course);
+    public void assignToCourse(Course course) {
+        this.studentInCourses.add(course);
     }
 
-    public void removeFromGroup(Long courseId) {
-        this.userInCourses.removeIf(course -> course.getId().equals(courseId));
+    public void removeFromCourse(Long courseId) {
+        this.studentInCourses.removeIf(course -> course.getId().equals(courseId));
     }
 
     public void addRoles(List<Role> roles) {

@@ -17,20 +17,27 @@ public class Course extends AuditableAbstractAggregateRoot<Course> {
     @Embedded
     private CourseJoinCode courseJoinCode;
 
+    private Long teacherId;
+
+    //constructor JPA
     protected Course() {
-        super();
+        //normalmente se deja vacio
     }
 
-    public Course(String title, String imageUrl) {
+    //constructor test
+    public Course(String title, String imageUrl,Long teacherId) {
         super();
         this.title = title;
         this.imageUrl = imageUrl;
+        this.teacherId=teacherId;
         this.courseJoinCode = null;
     }
 
+    //constructor por comando
     public Course(CreateCourseCommand createCourseCommand){
         this.title=createCourseCommand.title();
         this.imageUrl=createCourseCommand.imageUrl();
+        this.teacherId=createCourseCommand.teacherId();
         this.courseJoinCode=null;
     }
 

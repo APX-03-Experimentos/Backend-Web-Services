@@ -2,7 +2,8 @@ package apx.inc.design_web_services_backend.courses.domain.model.commands;
 
 public record CreateCourseCommand(
         String title,
-        String imageUrl
+        String imageUrl,
+        Long teacherId
 ) {
     public CreateCourseCommand{
         if (title == null){
@@ -10,6 +11,9 @@ public record CreateCourseCommand(
         }
         if (imageUrl == null){
             throw new IllegalArgumentException("Image URL cannot be null");
+        }
+        if (teacherId == null){
+            throw new IllegalArgumentException("Teacher ID cannot be null");
         }
     }
 }

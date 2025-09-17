@@ -12,7 +12,7 @@ public class UserResourceFromEntityAssembler {
                 user.getId(),
                 user.getUserName(),
                 user.getUserRoles().stream().map(Role::getName).toList(),
-                user.getUserInCourses().stream().map(
+                user.getStudentInCourses().stream().map(
                         course -> new CourseResource(
                                 course.getId(),
                                 course.getTitle(),

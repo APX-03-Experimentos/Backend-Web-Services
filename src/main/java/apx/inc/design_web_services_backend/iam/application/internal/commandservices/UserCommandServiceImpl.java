@@ -92,7 +92,7 @@ public class UserCommandServiceImpl implements UserCommandService {
         var user = userOptional.get();
 
         // ✅ Validar que pertenece al curso (CORREGIDO)
-        boolean belongsToCourse = user.getUserInCourses().stream()
+        boolean belongsToCourse = user.getStudentInCourses().stream()
                 .anyMatch(course -> course.getId().equals(leaveCourseCommand.courseId()));
 
         if (!belongsToCourse) {

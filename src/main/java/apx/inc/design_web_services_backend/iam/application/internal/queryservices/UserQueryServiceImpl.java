@@ -57,7 +57,7 @@ public class UserQueryServiceImpl implements UserQueryService {
     @Override
     public List<User> handle(GetUsersByCourseIdQuery query) {
         return userRepository.findAll().stream()
-                .filter(user -> user.getUserInCourses().stream()
+                .filter(user -> user.getStudentInCourses().stream()
                         .anyMatch(course -> course.getId().equals(query.courseId())))
                 .toList();
     }
