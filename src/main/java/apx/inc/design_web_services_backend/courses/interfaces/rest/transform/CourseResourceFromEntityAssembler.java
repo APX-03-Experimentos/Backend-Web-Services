@@ -9,7 +9,8 @@ public class CourseResourceFromEntityAssembler {
         return new CourseResource(
                 entity.getId(),
                 entity.getTitle(),
-                entity.getImageUrl()
+                entity.getImageUrl(),
+                entity.getCourseJoinCode().key()
         );
     }
 }
