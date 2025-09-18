@@ -15,6 +15,7 @@ public class UserResourceFromEntityAssembler {
                 user.getStudentInCourses().stream().map(
                         course -> new CourseResource(
                                 course.getId(),
+                                course.getTeacherId(),
                                 course.getTitle(),
                                 course.getImageUrl(),
                                 course.getCourseJoinCode().key()

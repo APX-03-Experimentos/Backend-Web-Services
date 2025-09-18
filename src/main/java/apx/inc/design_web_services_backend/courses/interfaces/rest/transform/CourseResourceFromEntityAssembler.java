@@ -8,6 +8,7 @@ public class CourseResourceFromEntityAssembler {
     public static CourseResource toResourceFromEntity(Course entity) {
         return new CourseResource(
                 entity.getId(),
+                entity.getTeacherId(),
                 entity.getTitle(),
                 entity.getImageUrl(),
                 entity.getCourseJoinCode().key()
