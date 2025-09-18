@@ -253,5 +253,27 @@ public class UserController {
         return ResponseEntity.ok(userResources);
     }
 
+    @GetMapping("/me")
+    @Operation(summary = "Get current authenticated user", description = "Retrieves the currently authenticated user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
+    public ResponseEntity<UserResource> getCurrentUser() {
+        try {
+            Long userId = getUserIdFromContext(); // obtiene el ID del usuario autenticado
+            var userOptional = userQueryService.handle(new GetUserByIdQuery(userId));
+
+            if (userOptional.isPresent()) {
+                var userResource = UserResourceFromEntityAssembler.toResourceFromEntity(userOptional.get());
+                return ResponseEntity.ok(userResource);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(401).build(); // Si no hay usuario autenticado
+        }
+    }
+
 
 }

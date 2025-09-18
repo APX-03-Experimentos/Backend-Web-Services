@@ -6,15 +6,17 @@ import apx.inc.design_web_services_backend.courses.domain.model.commands.JoinByJ
 import apx.inc.design_web_services_backend.courses.domain.model.commands.KickStudentCommand;
 import apx.inc.design_web_services_backend.courses.domain.model.queries.GetAllCoursesQuery;
 import apx.inc.design_web_services_backend.courses.domain.model.queries.GetCourseByIdQuery;
+import apx.inc.design_web_services_backend.courses.domain.model.queries.GetCoursesByTeacherIdQuery;
 import apx.inc.design_web_services_backend.courses.domain.model.queries.GetCoursesByUserIdQuery;
+import apx.inc.design_web_services_backend.courses.domain.model.valueobjects.CourseJoinCode;
 import apx.inc.design_web_services_backend.courses.domain.services.CourseCommandService;
 import apx.inc.design_web_services_backend.courses.domain.services.CourseQueryService;
 import apx.inc.design_web_services_backend.courses.interfaces.rest.resources.CreateCourseResource;
+import apx.inc.design_web_services_backend.courses.interfaces.rest.resources.SetJoinCodeResource;
 import apx.inc.design_web_services_backend.courses.interfaces.rest.resources.UpdateCourseResource;
-import apx.inc.design_web_services_backend.courses.interfaces.rest.transform.CourseResourceFromEntityAssembler;
-import apx.inc.design_web_services_backend.courses.interfaces.rest.transform.CreateCourseCommandFromResourceAssembler;
-import apx.inc.design_web_services_backend.courses.interfaces.rest.transform.UpdateCourseCommandFromResourceAssembler;
+import apx.inc.design_web_services_backend.courses.interfaces.rest.transform.*;
 import apx.inc.design_web_services_backend.iam.infrastructure.authorization.sfs.model.UserDetailsImpl;
+import apx.inc.design_web_services_backend.shared.interfaces.rest.resources.CourseJoinCodeResource;
 import apx.inc.design_web_services_backend.shared.interfaces.rest.resources.CourseResource;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -22,6 +24,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -58,7 +61,7 @@ public class CoursesController {
                     @ApiResponse(responseCode = "404", description = "Invalid input data")
             }
     )
-    public ResponseEntity<CourseResource> createGroup(@RequestBody CreateCourseResource resource) {
+    public ResponseEntity<CourseResource> createCourse(@RequestBody CreateCourseResource resource) {
         Long userId = getAuthenticatedUserId();
 
         // 1️⃣ Convertir el recurso a comando
@@ -73,8 +76,7 @@ public class CoursesController {
         }
 
         // 4️⃣  Recuperar el course creado
-        var getCourseByIdQuery = new GetCourseByIdQuery(createdId);
-        var course = courseQueryService.handle(getCourseByIdQuery,userId);
+        var course = courseQueryService.handle(new GetCourseByIdQuery(createdId));
 
         if (course.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -83,7 +85,7 @@ public class CoursesController {
         // 5️⃣ Devolver la respuesta
         var courseEntity = course.get();
         var courseResponse = CourseResourceFromEntityAssembler.toResourceFromEntity(courseEntity);
-        return new ResponseEntity<>(courseResponse, HttpStatus.CREATED);
+        return ResponseEntity.ok(courseResponse);
     }
 
     @PutMapping(value = "/{id}")
@@ -113,7 +115,7 @@ public class CoursesController {
 
         // 4️⃣  Recuperar el course creado
         var getCourseByIdQuery = new GetCourseByIdQuery(id);
-        var course = courseQueryService.handle(getCourseByIdQuery,userId);
+        var course = courseQueryService.handle(getCourseByIdQuery);
         if (course.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
@@ -139,7 +141,8 @@ public class CoursesController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/join/{key}")
+
+    @GetMapping(value ="/join/{key}")
     @Operation(summary = "Join a course via join code")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Joined course successfully"),
@@ -164,6 +167,13 @@ public class CoursesController {
     }
 
     @DeleteMapping("/{courseId}/students/{studentId}")
+    @Operation(summary = "Kick student from course", description = "Kick student from course with the specified id")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "204", description = "Student kicked successfully"),
+                    @ApiResponse(responseCode = "404", description = "Course with the specified id does not exist")
+            }
+    )
     public ResponseEntity<?> kickStudentFromCourse(
             @PathVariable Long courseId,
             @PathVariable Long studentId) {
@@ -175,6 +185,37 @@ public class CoursesController {
         courseCommandService.handle(command, teacherId);
 
         return ResponseEntity.noContent().build(); // 204 No Content ✅
+    }
+
+
+    @PutMapping("{courseId}/join-code")
+    @Operation(summary = "Set course join code", description = "Set a course join code with for a specified group id")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "Join code successfully set"),
+                    @ApiResponse(responseCode = "404", description = "Course not found or course already has a join code")
+            }
+    )
+    public ResponseEntity<CourseJoinCodeResource> setCourseJoinCodeByGroupId(@PathVariable Long courseId, @RequestBody SetJoinCodeResource resource) {
+
+
+
+        // 3️⃣ Crear el comando
+        var setCourseJoinCodeCommand =
+                SetJoinCodeCommandFromResourceAssembler.toCommandFromResource(courseId, resource);
+
+        // 4️⃣ Ejecutar el comando
+        var joinCode = this.courseCommandService.handle(setCourseJoinCodeCommand);
+
+        if (joinCode.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // 5️⃣ Convertir a recurso y retornar
+        var joinCodeResponse =
+                CourseJoinCodeResourceFromEntityAssembler.toResourceFromEntity(joinCode.get());
+
+        return ResponseEntity.ok(joinCodeResponse);
     }
 
     @GetMapping
@@ -206,10 +247,9 @@ public class CoursesController {
             }
     )
     public ResponseEntity<CourseResource> getCourseById(@PathVariable("id") Long id) {
-        Long userId = getAuthenticatedUserId();
 
         var getCourseByIdQuery = new GetCourseByIdQuery(id);
-        var course = courseQueryService.handle(getCourseByIdQuery,userId);
+        var course = courseQueryService.handle(getCourseByIdQuery);
         if (course.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
@@ -218,13 +258,16 @@ public class CoursesController {
         return ResponseEntity.ok(courseResponse);
     }
 
-    @GetMapping("/user/{userId}")
-    @Operation(summary = "Get groups by user ID", description = "Retrieves all courses that a user belongs to")
+    @GetMapping("/student")
+    @Operation(summary = "Get courses by student ID", description = "Retrieves all courses that a user belongs to")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Courses retrieved successfully"),
             @ApiResponse(responseCode = "404", description = "User not found or no courses found for user")
     })
-    public ResponseEntity<List<CourseResource>> getCoursesByUserId(@PathVariable Long userId) {
+    public ResponseEntity<List<CourseResource>> getCoursesByUserId() {
+
+        Long userId = getAuthenticatedUserId();
+
         // Create the query to get courses by user ID
         var getCoursesByUserIdQuery = new GetCoursesByUserIdQuery(userId);
 
@@ -242,5 +285,44 @@ public class CoursesController {
                 .toList();
         return ResponseEntity.ok(groupResponse);
     }
+
+    @GetMapping("/teacher")
+    @Operation(
+            summary = "Get courses by teacher ID",
+            description = "Retrieves all courses that a teacher owns. Uses the authenticated teacher's ID from JWT token"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Courses retrieved successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Teacher not found or no courses found for teacher"
+            )
+    })
+    public ResponseEntity<List<CourseResource>> getCoursesByTeacherId() {
+        Long teacherId = getAuthenticatedUserId(); // 👈 Id del profe logueado desde el JWT
+
+        // 1️⃣ Crear query
+        var getCoursesByTeacherIdQuery = new GetCoursesByTeacherIdQuery(teacherId);
+
+        // 2️⃣ Ejecutar query
+        var courses = courseQueryService.handle(getCoursesByTeacherIdQuery);
+
+        // 3️⃣ Validar resultado
+        if (courses.isEmpty()) {
+            return ResponseEntity.ok(List.of()); // ← Devuelve lista vacía, no 404
+        }
+
+        // 4️⃣ Convertir a recurso
+        var coursesResponse = courses.stream()
+                .map(CourseResourceFromEntityAssembler::toResourceFromEntity)
+                .toList();
+
+        return ResponseEntity.ok(coursesResponse);
+    }
+
+
 
 }

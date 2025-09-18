@@ -5,8 +5,12 @@ import apx.inc.design_web_services_backend.courses.domain.model.valueobjects.Cou
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface CourseRepository extends JpaRepository<Course, Long> {
 
     boolean existsByCourseJoinCode(CourseJoinCode courseJoinCode);
+
+    List<Course> findByTeacherId(Long teacherId);
 }

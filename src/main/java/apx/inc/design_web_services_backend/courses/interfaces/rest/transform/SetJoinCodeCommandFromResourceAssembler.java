@@ -4,9 +4,9 @@ import apx.inc.design_web_services_backend.courses.domain.model.commands.SetJoin
 import apx.inc.design_web_services_backend.courses.interfaces.rest.resources.SetJoinCodeResource;
 
 public class SetJoinCodeCommandFromResourceAssembler {
-    public static SetJoinCodeCommand toCommandFromResource(SetJoinCodeResource resource) {
+    public static SetJoinCodeCommand toCommandFromResource(Long courseId,SetJoinCodeResource resource) {
         return  new SetJoinCodeCommand(
-                resource.courseId(),
+                courseId,
                 resource.keycode(),
                 resource.expiration()
         );

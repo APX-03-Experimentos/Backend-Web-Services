@@ -71,36 +71,33 @@ public class CourseCommandServiceImpl implements CourseCommandService {
 
     @Override
     public Optional<Course> handle(JoinByJoinCodeCommand joinByJoinCodeCommand) {
-        //1. Buscar el grupo con ese joinCode
+        // 1. Buscar el curso con ese joinCode (protegido contra null)
         var courseOptional = courseRepository.findAll().stream()
-                .filter(course -> course.getCourseJoinCode().key().equals(joinByJoinCodeCommand.joinCode()))
+                .filter(course -> course.getCourseJoinCode() != null
+                        && course.getCourseJoinCode().key().equals(joinByJoinCodeCommand.joinCode()))
                 .findFirst();
 
         if (courseOptional.isEmpty()) {
-            throw new IllegalArgumentException("Course with ID " + joinByJoinCodeCommand.joinCode() + " not found");
+            throw new IllegalArgumentException("Course with joinCode " + joinByJoinCodeCommand.joinCode() + " not found");
         }
 
-        //2. Validar expiration
+        // 2. Validar expiration
         var course = courseOptional.get();
-
-        if (course.getCourseJoinCode().expiration().before(new Date())){
-            throw new IllegalArgumentException("Course with ID " + joinByJoinCodeCommand.joinCode() + " has expired");
+        if (course.getCourseJoinCode().expiration().before(new Date())) {
+            throw new IllegalArgumentException("Join code " + joinByJoinCodeCommand.joinCode() + " has expired");
         }
 
-        //3. Buscar al usuario para agregarlo al grupo
-
-        var userOptional=userRepository.findById(joinByJoinCodeCommand.studentId());
-
+        // 3. Buscar al usuario para agregarlo al curso
+        var userOptional = userRepository.findById(joinByJoinCodeCommand.studentId());
         if (userOptional.isEmpty()) {
             throw new IllegalArgumentException("User with ID " + joinByJoinCodeCommand.studentId() + " not found");
         }
 
-        var user=userOptional.get();
+        var user = userOptional.get();
 
-        //4. Verificar si ya esta unido
-
-        boolean alreadyInCourse=user.getStudentInCourses().stream()
-                .anyMatch(c->c.getId().equals(course.getId()));
+        // 4. Verificar si ya está unido
+        boolean alreadyInCourse = user.getStudentInCourses().stream()
+                .anyMatch(c -> c.getId().equals(course.getId()));
 
         if (!alreadyInCourse) {
             user.assignToCourse(course);
@@ -202,7 +199,7 @@ public class CourseCommandServiceImpl implements CourseCommandService {
         // 2. Verificar si el nuevo código ya está asignado a otro curso
         var isAssigned = courseRepository.findAll().stream().anyMatch(c->c.getCourseJoinCode().key().equals(setJoinCodeCommand.keycode()));
 
-        if (!isAssigned) {
+        if (isAssigned) {
             throw new IllegalArgumentException("Course with ID " + setJoinCodeCommand.courseId() + " is already assigned to any course");
         }
 

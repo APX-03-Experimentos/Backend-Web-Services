@@ -7,7 +7,6 @@ public class CreateCourseCommandFromResourceAssembler {
     public static CreateCourseCommand toCommandFromResource(CreateCourseResource resource,Long teacherId) {
         return new CreateCourseCommand(
                 resource.title(),
-                resource.imageUrl(),
                 teacherId
         );
     }

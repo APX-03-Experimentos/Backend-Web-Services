@@ -1,10 +1,7 @@
 package apx.inc.design_web_services_backend.courses.application.internal.queryservices;
 
 import apx.inc.design_web_services_backend.courses.domain.model.aggregates.Course;
-import apx.inc.design_web_services_backend.courses.domain.model.queries.GetAllCoursesQuery;
-import apx.inc.design_web_services_backend.courses.domain.model.queries.GetCourseByIdQuery;
-import apx.inc.design_web_services_backend.courses.domain.model.queries.GetCourseJoinCodeById;
-import apx.inc.design_web_services_backend.courses.domain.model.queries.GetCoursesByUserIdQuery;
+import apx.inc.design_web_services_backend.courses.domain.model.queries.*;
 import apx.inc.design_web_services_backend.courses.domain.model.valueobjects.CourseJoinCode;
 import apx.inc.design_web_services_backend.courses.domain.services.CourseQueryService;
 import apx.inc.design_web_services_backend.courses.infrastructure.persistence.jpa.repositories.CourseRepository;
@@ -31,27 +28,8 @@ public class CourseQueryServiceImpl implements CourseQueryService {
     }
 
     @Override
-    public Optional<Course> handle(GetCourseByIdQuery getCourseByIdQuery,Long userId) {
-        Optional<Course> optionalCourse = courseRepository.findById(getCourseByIdQuery.courseId());
-
-        if (optionalCourse.isEmpty()) {
-            throw new IllegalArgumentException("Course with ID " + getCourseByIdQuery.courseId() + " not found");
-        }
-
-        var userOpt = userRepository.findById(userId);
-        if (userOpt.isEmpty()) {
-            throw new IllegalArgumentException("User with ID " + userId + " not found");
-        }
-
-        boolean belongsToGroup = userOpt.get().getStudentInCourses().stream()
-                .anyMatch(c -> c.getId().equals(getCourseByIdQuery.courseId()));
-
-        if (!belongsToGroup) {
-            // El usuario no pertenece al grupo
-            return Optional.empty();
-        }
-
-        return optionalCourse;
+    public Optional<Course> handle(GetCourseByIdQuery query) {
+        return courseRepository.findById(query.courseId());
     }
 
     @Override
@@ -88,5 +66,9 @@ public class CourseQueryServiceImpl implements CourseQueryService {
         }
 
         return optionalCourseList;
+    }
+
+    public List<Course> handle(GetCoursesByTeacherIdQuery query) {
+        return courseRepository.findByTeacherId(query.teacherId());
     }
 }
