@@ -3,7 +3,7 @@ package apx.inc.design_web_services_backend.assigments.application.internal.quer
 import apx.inc.design_web_services_backend.assigments.domain.model.aggregates.Assignment;
 import apx.inc.design_web_services_backend.assigments.domain.model.queries.GetAllAssignmentsQuery;
 import apx.inc.design_web_services_backend.assigments.domain.model.queries.GetAssignmentByIdQuery;
-import apx.inc.design_web_services_backend.assigments.domain.model.queries.GetAssignmentsByGroupIdQuery;
+import apx.inc.design_web_services_backend.assigments.domain.model.queries.GetAssignmentsByCourseIdQuery;
 import apx.inc.design_web_services_backend.assigments.domain.services.AssignmentQueryService;
 import apx.inc.design_web_services_backend.assigments.infrastructure.persistence.jpa.repositories.AssignmentRepository;
 import apx.inc.design_web_services_backend.courses.infrastructure.persistence.jpa.repositories.CourseRepository;
@@ -74,7 +74,7 @@ public class AssignmentQueryServiceImpl implements AssignmentQueryService {
     }
 
     @Override
-    public List<Assignment> handle(GetAssignmentsByGroupIdQuery query, Long userId) {
+    public List<Assignment> handle(GetAssignmentsByCourseIdQuery query, Long userId) {
         Long courseId = query.courseId();
 
         // 1. Verificar que el usuario existe
@@ -82,14 +82,25 @@ public class AssignmentQueryServiceImpl implements AssignmentQueryService {
         if (userOpt.isEmpty()) {
             throw new IllegalArgumentException("User with ID " + userId + " not found");
         }
+        var user= userOpt.get();
 
         // 2. Verificar que pertenece al grupo
-        boolean belongsToGroup = userOpt.get().getStudentInCourses().stream()
-                .anyMatch(c -> c.getId().equals(courseId));
+        boolean hasAccess;
 
-        if (!belongsToGroup) {
-            // Usuario no tiene acceso a Challenges de este grupo
-            return List.of();
+        if (user.getUserRoles().stream().anyMatch(r -> r.getName() == Roles.ROLE_TEACHER)) {
+            // Usuario es teacher → verificar que sea teacher del curso
+            hasAccess = courseRepository.findByTeacherId(userId)
+                    .stream()
+                    .anyMatch(c -> c.getId().equals(query.courseId()));
+        } else {
+            // Usuario es estudiante → verificar que esté inscrito en el curso
+            hasAccess = user.getStudentInCourses()
+                    .stream()
+                    .anyMatch(c -> c.getId().equals(query.courseId()));
+        }
+
+        if (!hasAccess) {
+            throw new IllegalArgumentException("User with ID " + userId + " does not belong to the group of this challenge");
         }
 
         // 3. Si pertenece, devolver los Challenges

@@ -3,7 +3,7 @@ package apx.inc.design_web_services_backend.assigments.interfaces.rest;
 import apx.inc.design_web_services_backend.assigments.domain.model.commands.DeleteAssignmentCommand;
 import apx.inc.design_web_services_backend.assigments.domain.model.queries.GetAllAssignmentsQuery;
 import apx.inc.design_web_services_backend.assigments.domain.model.queries.GetAssignmentByIdQuery;
-import apx.inc.design_web_services_backend.assigments.domain.model.queries.GetAssignmentsByGroupIdQuery;
+import apx.inc.design_web_services_backend.assigments.domain.model.queries.GetAssignmentsByCourseIdQuery;
 import apx.inc.design_web_services_backend.assigments.domain.services.AssignmentCommandService;
 import apx.inc.design_web_services_backend.assigments.domain.services.AssignmentQueryService;
 import apx.inc.design_web_services_backend.assigments.interfaces.rest.resource.AssignmentResource;
@@ -150,15 +150,15 @@ public class AssignmentsController {
     }
 
     @GetMapping("/course/{courseId}")
-    @Operation(summary = "Get assignments by course ID", description = "Retrieves a list of challenges associated with a specific course ID.")
+    @Operation(summary = "Get assignments by course ID", description = "Retrieves a list of assignments associated with a specific course ID.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Challenges retrieved successfully"),
-        @ApiResponse(responseCode = "404", description = "No challenges found for the group")
+        @ApiResponse(responseCode = "200", description = "Assignments retrieved successfully"),
+        @ApiResponse(responseCode = "404", description = "No Assignments found for the group")
     })
-    public ResponseEntity<List<AssignmentResource>> getChallengesByCourseId(@PathVariable Long courseId){
+    public ResponseEntity<List<AssignmentResource>> getAssignmentsByCourseId(@PathVariable Long courseId){
 
         Long authenticatedUserId = getAuthenticatedUserId();
-        var getAssignmentsByGroupIdQuery=new GetAssignmentsByGroupIdQuery(courseId);
+        var getAssignmentsByGroupIdQuery=new GetAssignmentsByCourseIdQuery(courseId);
         var assignments =assignmentQueryService.handle(getAssignmentsByGroupIdQuery,authenticatedUserId);
         if (assignments.isEmpty()){
             return ResponseEntity.notFound().build(); // da una respuesta 404 y vacia
