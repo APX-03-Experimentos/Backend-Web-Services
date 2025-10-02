@@ -1,11 +1,11 @@
 package apx.inc.design_web_services_backend.assigments.domain.services;
 
 
-import apx.inc.design_web_services_backend.assigments.domain.model.aggregates.Submission;
 import apx.inc.design_web_services_backend.assigments.domain.model.commands.CreateSubmissionCommand;
 import apx.inc.design_web_services_backend.assigments.domain.model.commands.DeleteSubmissionCommand;
 import apx.inc.design_web_services_backend.assigments.domain.model.commands.GradeSubmissionCommand;
 import apx.inc.design_web_services_backend.assigments.domain.model.commands.UpdateSubmissionCommand;
+import apx.inc.design_web_services_backend.assigments.domain.model.entities.Submission;
 
 import java.util.Optional;
 

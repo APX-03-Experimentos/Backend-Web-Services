@@ -1,7 +1,10 @@
 package apx.inc.design_web_services_backend.assigments.infrastructure.persistence.jpa.repositories;
 
 import apx.inc.design_web_services_backend.assigments.domain.model.aggregates.Assignment;
+import apx.inc.design_web_services_backend.assigments.domain.model.entities.Submission;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -16,4 +19,6 @@ public interface AssignmentRepository extends JpaRepository<Assignment,Long> {
     boolean existsByTitleAndCourseId(String title, Long courseId);
 
     Optional<Assignment> findByTitleAndCourseId(String title, Long courseId);
+
+
 }

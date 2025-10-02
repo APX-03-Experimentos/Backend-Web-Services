@@ -10,6 +10,7 @@ import apx.inc.design_web_services_backend.iam.infrastructure.persistence.jpa.re
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -139,7 +140,9 @@ public class CourseCommandServiceImpl implements CourseCommandService {
 
         var teacher=optionalTeacher.get();
         // es owner ?
-        boolean isOwner= teacher.getStudentInCourses().stream().anyMatch(c->c.getId().equals(course.getId()));
+        boolean isOwner= course.getTeacherId().equals(teacherId);
+
+
 
         if (!isOwner) {
             throw new IllegalArgumentException("Teacher with ID " + teacherId + " is not the owner of this course");

@@ -5,7 +5,7 @@ import java.util.Date;
 public record UpdateAssignmentResource(
         String title,
         String description,
-        Long groupId,
+        Long courseId,
         Date deadline,
         String imageUrl) {
     public UpdateAssignmentResource {
@@ -15,7 +15,7 @@ public record UpdateAssignmentResource(
         if (description == null || description.isBlank()) {
             throw new IllegalArgumentException("Description cannot be null or blank");
         }
-        if (groupId == null || groupId <= 0) {
+        if (courseId == null || courseId <= 0) {
             throw new IllegalArgumentException("Group ID cannot be null or less than 1");
         }
         if (deadline == null || deadline.before(new Date())) {

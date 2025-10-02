@@ -14,7 +14,7 @@ public interface CourseQueryService {
 
     Optional<CourseJoinCode> handle(GetCourseJoinCodeById getCourseJoinCodeByIdQuery);
 
-    List<Course> handle(GetCoursesByUserIdQuery getCoursesByUserIdQuery);
+    List<Course> handle(GetCoursesByStudentIdQuery getCoursesByStudentIdQuery);
 
     List<Course> handle(GetCoursesByTeacherIdQuery getCoursesByTeacherIdQuery);
 

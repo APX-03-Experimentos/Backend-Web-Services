@@ -1,7 +1,7 @@
 package apx.inc.design_web_services_backend.assigments.domain.services;
 
 
-import apx.inc.design_web_services_backend.assigments.domain.model.aggregates.Submission;
+import apx.inc.design_web_services_backend.assigments.domain.model.entities.Submission;
 import apx.inc.design_web_services_backend.assigments.domain.model.queries.*;
 
 import java.util.List;
