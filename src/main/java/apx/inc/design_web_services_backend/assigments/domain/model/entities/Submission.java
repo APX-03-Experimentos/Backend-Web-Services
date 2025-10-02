@@ -1,26 +1,21 @@
-package apx.inc.design_web_services_backend.assigments.domain.model.aggregates;
+package apx.inc.design_web_services_backend.assigments.domain.model.entities;
 
-
+import apx.inc.design_web_services_backend.assigments.domain.model.aggregates.Assignment;
 import apx.inc.design_web_services_backend.assigments.domain.model.commands.CreateSubmissionCommand;
 import apx.inc.design_web_services_backend.assigments.domain.model.valueobjects.States;
 import apx.inc.design_web_services_backend.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
-import jakarta.persistence.Embedded;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.Setter;
 
-@Setter
 @Getter
 @Entity
 public class Submission extends AuditableAbstractAggregateRoot<Submission> {
 
+    // Referencia al Aggregate Root
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "assignment_id", nullable = false)
+    private Assignment assignment;
 
-    //id en el auditable abstract aggregate root
-
-
-    private Long assignmentId;
     private Long studentId;
     private String content;
     private int score;
@@ -33,18 +28,8 @@ public class Submission extends AuditableAbstractAggregateRoot<Submission> {
         super();
     }
 
-    /*
-    public Submission(Long challengeId, Long studentId, String content, int score, String imageUrl) {
-        this.challengeId = new ChallengeId(challengeId);
-        this.studentId = new StudentId(studentId);
-        this.content = new Content(content);
-        this.score = new Score(score);
-        this.imageUrl = imageUrl;
-    }
-    */
-
-    public Submission(CreateSubmissionCommand command) {
-        this.assignmentId = command.assignmentId();
+    public Submission(Assignment assignment,CreateSubmissionCommand command) {
+        this.assignment = assignment;
         this.studentId = command.studentId();
         this.content = command.content();
         this.score = 0;
@@ -52,10 +37,10 @@ public class Submission extends AuditableAbstractAggregateRoot<Submission> {
         this.state = States.NOT_GRADED; // Estado inicial
     }
 
-    //Metodos que permiten actualizar el contenido y la puntuación de la submission
 
-    public Submission updateSubmission(Long newAssignmentId, Long newStudentId, String newContent, int newScore, String newImageUrl) {
-        this.assignmentId = newAssignmentId;
+
+    public Submission updateSubmission(Assignment assignment, Long newStudentId, String newContent, int newScore, String newImageUrl) {
+        this.assignment = assignment;
         this.studentId = newStudentId;
         this.content = newContent;
         this.score = newScore;
@@ -65,6 +50,7 @@ public class Submission extends AuditableAbstractAggregateRoot<Submission> {
 
     public Submission gradeSubmission(int newScore) {
         this.score = newScore;
+        this.state = States.GRADED;
         return this;
     }
 
@@ -72,6 +58,5 @@ public class Submission extends AuditableAbstractAggregateRoot<Submission> {
         this.state = newState;
         return this;
     }
-
 
 }

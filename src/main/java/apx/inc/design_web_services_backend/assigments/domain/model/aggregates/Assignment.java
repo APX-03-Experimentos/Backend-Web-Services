@@ -2,11 +2,17 @@ package apx.inc.design_web_services_backend.assigments.domain.model.aggregates;
 
 
 import apx.inc.design_web_services_backend.assigments.domain.model.commands.CreateAssignmentCommand;
+import apx.inc.design_web_services_backend.assigments.domain.model.entities.Submission;
 import apx.inc.design_web_services_backend.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.OneToMany;
 import lombok.Getter;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Entity
@@ -17,6 +23,10 @@ public class Assignment extends AuditableAbstractAggregateRoot<Assignment> {
     private Long courseId;
     private Date deadline;
     private String imageUrl;
+
+    // Relación One-to-Many con Submission
+    @OneToMany(mappedBy = "assignment", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Submission> submissions = new ArrayList<>();
 
     protected Assignment() {
         super();

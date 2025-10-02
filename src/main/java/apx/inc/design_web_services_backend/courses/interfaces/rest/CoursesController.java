@@ -6,9 +6,8 @@ import apx.inc.design_web_services_backend.courses.domain.model.commands.JoinByJ
 import apx.inc.design_web_services_backend.courses.domain.model.commands.KickStudentCommand;
 import apx.inc.design_web_services_backend.courses.domain.model.queries.GetAllCoursesQuery;
 import apx.inc.design_web_services_backend.courses.domain.model.queries.GetCourseByIdQuery;
+import apx.inc.design_web_services_backend.courses.domain.model.queries.GetCoursesByStudentIdQuery;
 import apx.inc.design_web_services_backend.courses.domain.model.queries.GetCoursesByTeacherIdQuery;
-import apx.inc.design_web_services_backend.courses.domain.model.queries.GetCoursesByUserIdQuery;
-import apx.inc.design_web_services_backend.courses.domain.model.valueobjects.CourseJoinCode;
 import apx.inc.design_web_services_backend.courses.domain.services.CourseCommandService;
 import apx.inc.design_web_services_backend.courses.domain.services.CourseQueryService;
 import apx.inc.design_web_services_backend.courses.interfaces.rest.resources.CreateCourseResource;
@@ -22,9 +21,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -262,17 +259,17 @@ public class CoursesController {
     @Operation(summary = "Get courses by student ID", description = "Retrieves all courses that a user belongs to")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Courses retrieved successfully"),
-            @ApiResponse(responseCode = "404", description = "User not found or no courses found for user")
+            @ApiResponse(responseCode = "404", description = "Student not found or no courses found for student")
     })
-    public ResponseEntity<List<CourseResource>> getCoursesByUserId() {
+    public ResponseEntity<List<CourseResource>> getCoursesByStudentId() {
 
         Long userId = getAuthenticatedUserId();
 
         // Create the query to get courses by user ID
-        var getCoursesByUserIdQuery = new GetCoursesByUserIdQuery(userId);
+        var getCoursesByStudentIdQuery = new GetCoursesByStudentIdQuery(userId);
 
         // Execute the query using the courseQueryService
-        var courses = courseQueryService.handle(getCoursesByUserIdQuery);
+        var courses = courseQueryService.handle(getCoursesByStudentIdQuery);
 
         // Check if courses are found
         if (courses.isEmpty()) {

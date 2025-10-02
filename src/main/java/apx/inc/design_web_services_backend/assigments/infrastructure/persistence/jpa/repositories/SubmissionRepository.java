@@ -1,6 +1,6 @@
 package apx.inc.design_web_services_backend.assigments.infrastructure.persistence.jpa.repositories;
 
-import apx.inc.design_web_services_backend.assigments.domain.model.aggregates.Submission;
+import apx.inc.design_web_services_backend.assigments.domain.model.entities.Submission;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -83,7 +83,7 @@ public class AssignmentCommandServiceImpl implements AssignmentCommandService {
 
         // Validación cruzada entre BCs
         if (!courseRepository.existsById(updateAssignmentCommand.courseId())) {
-            throw new IllegalArgumentException("Group not found: " + updateAssignmentCommand.courseId());
+            throw new IllegalArgumentException("Course not found: " + updateAssignmentCommand.courseId());
         }
 
         // Validar usuario pertenece al grupo

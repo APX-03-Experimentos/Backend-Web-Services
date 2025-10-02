@@ -9,7 +9,7 @@ public class UpdateAssignmentCommandFromResourceAssembler {
                 challengeId,
                 resource.title(),
                 resource.description(),
-                resource.groupId(),
+                resource.courseId(),
                 resource.deadline(),
                 resource.imageUrl()
         );

@@ -1,6 +1,6 @@
 package apx.inc.design_web_services_backend.assigments.application.internal.queryservices;
 
-import apx.inc.design_web_services_backend.assigments.domain.model.aggregates.Submission;
+import apx.inc.design_web_services_backend.assigments.domain.model.entities.Submission;
 import apx.inc.design_web_services_backend.assigments.domain.model.queries.*;
 import apx.inc.design_web_services_backend.assigments.domain.services.SubmissionQueryService;
 import apx.inc.design_web_services_backend.assigments.infrastructure.persistence.jpa.repositories.AssignmentRepository;
@@ -42,7 +42,7 @@ public class SubmissionQueryServiceImpl implements SubmissionQueryService {
         }
 
         // 3. Validar Assignment del Submission
-        Long submissionAssignmentId = submissionOptional.get().getAssignmentId();
+        Long submissionAssignmentId = submissionOptional.get().getAssignment().getId();
         var assignmentOptional = assignmentRepository.findById(submissionAssignmentId);
         if (assignmentOptional.isEmpty()) {
             throw new IllegalArgumentException("Challenge with ID " + submissionAssignmentId + " not found");
@@ -89,7 +89,7 @@ public class SubmissionQueryServiceImpl implements SubmissionQueryService {
 
         return allSubmissions.stream()
                 .filter(submission -> {
-                    Long assignmentId = submission.getAssignmentId();
+                    Long assignmentId = submission.getAssignment().getId();
                     return assignmentRepository.findById(assignmentId)
                             .map(assignment -> assignment.getCourseId().equals(query.courseId()))
                             .orElse(false);
@@ -103,7 +103,7 @@ public class SubmissionQueryServiceImpl implements SubmissionQueryService {
 
         return allSubmissions.stream()
                 .filter(submission -> {
-                    Long assignmentId = submission.getAssignmentId();
+                    Long assignmentId = submission.getAssignment().getId();
                     return assignmentRepository.findById(assignmentId)
                             .map(challenge -> challenge.getCourseId().equals(query.courseId()))
                             .orElse(false);

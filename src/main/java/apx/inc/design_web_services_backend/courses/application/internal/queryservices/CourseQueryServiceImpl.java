@@ -5,6 +5,7 @@ import apx.inc.design_web_services_backend.courses.domain.model.queries.*;
 import apx.inc.design_web_services_backend.courses.domain.model.valueobjects.CourseJoinCode;
 import apx.inc.design_web_services_backend.courses.domain.services.CourseQueryService;
 import apx.inc.design_web_services_backend.courses.infrastructure.persistence.jpa.repositories.CourseRepository;
+import apx.inc.design_web_services_backend.iam.domain.model.valueobjects.Roles;
 import apx.inc.design_web_services_backend.iam.infrastructure.persistence.jpa.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
@@ -46,29 +47,37 @@ public class CourseQueryServiceImpl implements CourseQueryService {
     }
 
     @Override
-    public List<Course> handle(GetCoursesByUserIdQuery getCoursesByUserIdQuery) {
+    public List<Course> handle(GetCoursesByStudentIdQuery getCoursesByStudentIdQuery) {
 
-        //1. validamos el student
-        var optionalUser= userRepository.findById(getCoursesByUserIdQuery.userId());
+        //1. Validamos el user
+        var optionalStudent= userRepository.findById(getCoursesByStudentIdQuery.studentId());
 
-        if(optionalUser.isEmpty()){
-            throw new IllegalArgumentException("User not found");
+        if(optionalStudent.isEmpty()){
+            throw new IllegalArgumentException("Student not found");
         }
 
-        var user= optionalUser.get();
+        //2. Validamos que el user sea un student
 
-        //2. devolvemos los courses que coinciden con la lista del student
+        if (optionalStudent.get().getUserRoles().stream().noneMatch(role -> role.getName().equals(Roles.ROLE_STUDENT))) {
+            throw new IllegalArgumentException("User is not a student");
+        }
 
-        var optionalCourseList= user.getStudentInCourses().stream().toList();
+        var student= optionalStudent.get();
+
+        //3. Devolvemos los courses que coinciden con la lista del student
+
+        var optionalCourseList= student.getStudentInCourses().stream().toList();
 
         if(optionalCourseList.isEmpty()){
-            throw new IllegalArgumentException("No courses assigned to this user");
+            throw new IllegalArgumentException("No courses assigned to this student");
         }
 
         return optionalCourseList;
     }
 
     public List<Course> handle(GetCoursesByTeacherIdQuery query) {
+
         return courseRepository.findByTeacherId(query.teacherId());
+
     }
 }

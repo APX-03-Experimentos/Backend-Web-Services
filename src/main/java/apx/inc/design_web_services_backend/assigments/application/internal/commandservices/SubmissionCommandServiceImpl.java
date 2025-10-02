@@ -1,10 +1,10 @@
 package apx.inc.design_web_services_backend.assigments.application.internal.commandservices;
 
-import apx.inc.design_web_services_backend.assigments.domain.model.aggregates.Submission;
 import apx.inc.design_web_services_backend.assigments.domain.model.commands.CreateSubmissionCommand;
 import apx.inc.design_web_services_backend.assigments.domain.model.commands.DeleteSubmissionCommand;
 import apx.inc.design_web_services_backend.assigments.domain.model.commands.GradeSubmissionCommand;
 import apx.inc.design_web_services_backend.assigments.domain.model.commands.UpdateSubmissionCommand;
+import apx.inc.design_web_services_backend.assigments.domain.model.entities.Submission;
 import apx.inc.design_web_services_backend.assigments.domain.model.valueobjects.States;
 import apx.inc.design_web_services_backend.assigments.domain.services.SubmissionCommandService;
 import apx.inc.design_web_services_backend.assigments.infrastructure.persistence.jpa.repositories.AssignmentRepository;
@@ -58,7 +58,7 @@ public class SubmissionCommandServiceImpl implements SubmissionCommandService {
         }
 
         // 4. Crear la Submission
-        var submission= new Submission(createSubmissionCommand);
+        var submission= new Submission(assignment,createSubmissionCommand);
         try {
             submissionRepository.save(submission);
             return submission.getId();
@@ -110,7 +110,7 @@ public class SubmissionCommandServiceImpl implements SubmissionCommandService {
         try {
             var updatedSubmission = submissionRepository.save(submissionToUpdate
                     .updateSubmission(
-                            updateSubmissionCommand.assignmentId(),
+                            assignment,
                             updateSubmissionCommand.studentId(),
                             updateSubmissionCommand.content(),
                             updateSubmissionCommand.score(),
