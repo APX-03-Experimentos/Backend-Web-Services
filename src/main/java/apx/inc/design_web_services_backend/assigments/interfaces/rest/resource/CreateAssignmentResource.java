@@ -1,6 +1,9 @@
 package apx.inc.design_web_services_backend.assigments.interfaces.rest.resource;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.Date;
+import java.util.List;
 
 public record CreateAssignmentResource(
         String title,

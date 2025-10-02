@@ -7,6 +7,9 @@ import apx.inc.design_web_services_backend.shared.domain.model.aggregates.Audita
 import jakarta.persistence.*;
 import lombok.Getter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @Entity
 public class Submission extends AuditableAbstractAggregateRoot<Submission> {
@@ -23,6 +26,12 @@ public class Submission extends AuditableAbstractAggregateRoot<Submission> {
 
     @Enumerated(EnumType.STRING)
     private States state;
+
+    // NUEVO: Lista para archivos adicionales
+    @ElementCollection
+    @CollectionTable(name = "submission_files", joinColumns = @JoinColumn(name = "submission_id"))
+    @Column(name = "file_url")
+    private List<String> fileUrls = new ArrayList<>();
 
     protected Submission() {
         super();
@@ -48,15 +57,22 @@ public class Submission extends AuditableAbstractAggregateRoot<Submission> {
         return this;
     }
 
-    public Submission gradeSubmission(int newScore) {
+    public void gradeSubmission(int newScore) {
         this.score = newScore;
         this.state = States.GRADED;
-        return this;
     }
 
-    public Submission changeState(States newState) {
+    public void changeState(States newState) {
         this.state = newState;
-        return this;
+    }
+
+    // Métodos para archivos adicionales
+    public void addFileUrl(String fileUrl) {
+        this.fileUrls.add(fileUrl);
+    }
+
+    public void removeFileUrl(String fileUrl) {
+        this.fileUrls.remove(fileUrl);
     }
 
 }

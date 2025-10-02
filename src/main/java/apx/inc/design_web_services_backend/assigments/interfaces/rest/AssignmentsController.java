@@ -1,6 +1,8 @@
 package apx.inc.design_web_services_backend.assigments.interfaces.rest;
 
+import apx.inc.design_web_services_backend.assigments.domain.model.commands.AddFilesToAssignmentCommand;
 import apx.inc.design_web_services_backend.assigments.domain.model.commands.DeleteAssignmentCommand;
+import apx.inc.design_web_services_backend.assigments.domain.model.commands.RemoveFileFromAssignmentCommand;
 import apx.inc.design_web_services_backend.assigments.domain.model.queries.GetAllAssignmentsQuery;
 import apx.inc.design_web_services_backend.assigments.domain.model.queries.GetAssignmentByIdQuery;
 import apx.inc.design_web_services_backend.assigments.domain.model.queries.GetAssignmentsByCourseIdQuery;
@@ -13,16 +15,23 @@ import apx.inc.design_web_services_backend.assigments.interfaces.rest.transform.
 import apx.inc.design_web_services_backend.assigments.interfaces.rest.transform.CreateAssignmentCommandFromResourceAssembler;
 import apx.inc.design_web_services_backend.assigments.interfaces.rest.transform.UpdateAssignmentCommandFromResourceAssembler;
 import apx.inc.design_web_services_backend.iam.infrastructure.authorization.sfs.model.UserDetailsImpl;
+import apx.inc.design_web_services_backend.shared.domain.services.CloudinaryService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -33,11 +42,13 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public class AssignmentsController {
     private final AssignmentCommandService assignmentCommandService;
     private final AssignmentQueryService assignmentQueryService;
+    private final CloudinaryService cloudinaryService;
 
 
-    public AssignmentsController(AssignmentCommandService assignmentCommandService, AssignmentQueryService assignmentQueryService) {
+    public AssignmentsController(AssignmentCommandService assignmentCommandService, AssignmentQueryService assignmentQueryService,CloudinaryService cloudinaryService) {
         this.assignmentCommandService = assignmentCommandService;
         this.assignmentQueryService = assignmentQueryService;
+        this.cloudinaryService=cloudinaryService;
     }
 
     private Long getAuthenticatedUserId() {
@@ -170,7 +181,50 @@ public class AssignmentsController {
         return ResponseEntity.ok(assignmentResources);
     }
 
+    @PostMapping(value = "/{assignmentId}/files", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Add files to assignment")
+    public ResponseEntity<List<String>> addFilesToAssignment(
+            @Parameter(description = "ID of the assignment", required = true)
+            @PathVariable Long assignmentId,
 
+            @Parameter(description = "Files to upload", required = true,
+                    content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+                            schema = @Schema(type = "string", format = "binary")))
+            @RequestPart("files") MultipartFile[] files) {
+
+        try {
+            List<String> uploadedUrls = new ArrayList<>();
+
+            for (MultipartFile file : files) {
+                if (!file.isEmpty()) {
+                    String fileUrl = cloudinaryService.uploadFile(file);
+                    uploadedUrls.add(fileUrl);
+                }
+            }
+
+            var command = new AddFilesToAssignmentCommand(assignmentId, uploadedUrls);
+            assignmentCommandService.handle(command);
+
+            return ResponseEntity.ok(uploadedUrls);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @DeleteMapping("/{assignmentId}/files")
+    @Operation(summary = "Remove file from assignment")
+    public ResponseEntity<Void> removeFileFromAssignment(
+            @PathVariable Long assignmentId,
+            @RequestParam String fileUrl) {
+        try {
+            var command = new RemoveFileFromAssignmentCommand(assignmentId, fileUrl);
+            assignmentCommandService.handle(command);
+
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 
 
 }

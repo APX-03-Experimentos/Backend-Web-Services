@@ -1,10 +1,7 @@
 package apx.inc.design_web_services_backend.assigments.domain.services;
 
 
-import apx.inc.design_web_services_backend.assigments.domain.model.commands.CreateSubmissionCommand;
-import apx.inc.design_web_services_backend.assigments.domain.model.commands.DeleteSubmissionCommand;
-import apx.inc.design_web_services_backend.assigments.domain.model.commands.GradeSubmissionCommand;
-import apx.inc.design_web_services_backend.assigments.domain.model.commands.UpdateSubmissionCommand;
+import apx.inc.design_web_services_backend.assigments.domain.model.commands.*;
 import apx.inc.design_web_services_backend.assigments.domain.model.entities.Submission;
 
 import java.util.Optional;
@@ -24,4 +21,7 @@ public interface SubmissionCommandService {
     //¿Por qué retorna void? Porque no se necesita retornar nada.
 
     Optional<Submission> handle(GradeSubmissionCommand command);
+
+    void handle(AddFilesToSubmissionCommand addFilesToSubmissionCommand);  // Para 1 o múltiples archivos
+    void handle(RemoveFileFromSubmissionCommand removeFileFromSubmissionCommand); // Para eliminar 1 archivo
 }

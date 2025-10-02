@@ -1,6 +1,6 @@
 package apx.inc.design_web_services_backend.assigments.interfaces.rest;
 
-import apx.inc.design_web_services_backend.assigments.domain.model.commands.DeleteSubmissionCommand;
+import apx.inc.design_web_services_backend.assigments.domain.model.commands.*;
 import apx.inc.design_web_services_backend.assigments.domain.model.queries.*;
 import apx.inc.design_web_services_backend.assigments.domain.services.SubmissionCommandService;
 import apx.inc.design_web_services_backend.assigments.domain.services.SubmissionQueryService;
@@ -13,16 +13,23 @@ import apx.inc.design_web_services_backend.assigments.interfaces.rest.transform.
 import apx.inc.design_web_services_backend.assigments.interfaces.rest.transform.SubmissionResourceFromEntityAssembler;
 import apx.inc.design_web_services_backend.assigments.interfaces.rest.transform.UpdateSubmissionCommandFromResourceAssembler;
 import apx.inc.design_web_services_backend.iam.infrastructure.authorization.sfs.model.UserDetailsImpl;
+import apx.inc.design_web_services_backend.shared.domain.services.CloudinaryService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -33,10 +40,12 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public class SubmissionsController {
     private final SubmissionCommandService submissionCommandService;
     private final SubmissionQueryService submissionQueryService;
+    private final CloudinaryService cloudinaryService;
 
-    public SubmissionsController(SubmissionCommandService submissionCommandService, SubmissionQueryService submissionQueryService) {
+    public SubmissionsController(SubmissionCommandService submissionCommandService, SubmissionQueryService submissionQueryService,CloudinaryService cloudinaryService) {
         this.submissionCommandService = submissionCommandService;
         this.submissionQueryService = submissionQueryService;
+        this.cloudinaryService = cloudinaryService;
     }
 
     private Long getAuthenticatedUserId() {
@@ -289,6 +298,50 @@ public class SubmissionsController {
         return ResponseEntity.ok(resource);
     }
 
+    @PostMapping(value = "/{submissionId}/files", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Add files to submission")
+    public ResponseEntity<List<String>> addFilesToSubmission(
+            @Parameter(description = "ID of the submission", required = true)
+            @PathVariable Long submissionId,
+
+            @Parameter(description = "Files to upload", required = true,
+                    content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+                            schema = @Schema(type = "string", format = "binary")))
+            @RequestPart("files") MultipartFile[] files) {
+
+        try {
+            List<String> uploadedUrls = new ArrayList<>();
+
+            for (MultipartFile file : files) {
+                if (!file.isEmpty()) {
+                    String fileUrl = cloudinaryService.uploadFile(file);
+                    uploadedUrls.add(fileUrl);
+                }
+            }
+
+            var command = new AddFilesToSubmissionCommand(submissionId, uploadedUrls);
+            submissionCommandService.handle(command);
+
+            return ResponseEntity.ok(uploadedUrls);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @DeleteMapping("/{submissionId}/files")
+    @Operation(summary = "Remove file from submission")
+    public ResponseEntity<Void> removeFileFromSubmission(
+            @PathVariable Long submissionId,
+            @RequestParam String fileUrl) {
+        try {
+            var command = new RemoveFileFromSubmissionCommand(submissionId, fileUrl);
+            submissionCommandService.handle(command);
+
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 
 
 
