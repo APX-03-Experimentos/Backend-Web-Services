@@ -1,9 +1,7 @@
 package apx.inc.design_web_services_backend.assigments.application.internal.commandservices;
 
-import apx.inc.design_web_services_backend.assigments.domain.model.commands.CreateSubmissionCommand;
-import apx.inc.design_web_services_backend.assigments.domain.model.commands.DeleteSubmissionCommand;
-import apx.inc.design_web_services_backend.assigments.domain.model.commands.GradeSubmissionCommand;
-import apx.inc.design_web_services_backend.assigments.domain.model.commands.UpdateSubmissionCommand;
+import apx.inc.design_web_services_backend.assigments.domain.model.aggregates.Assignment;
+import apx.inc.design_web_services_backend.assigments.domain.model.commands.*;
 import apx.inc.design_web_services_backend.assigments.domain.model.entities.Submission;
 import apx.inc.design_web_services_backend.assigments.domain.model.valueobjects.States;
 import apx.inc.design_web_services_backend.assigments.domain.services.SubmissionCommandService;
@@ -11,6 +9,7 @@ import apx.inc.design_web_services_backend.assigments.infrastructure.persistence
 import apx.inc.design_web_services_backend.assigments.infrastructure.persistence.jpa.repositories.SubmissionRepository;
 import apx.inc.design_web_services_backend.iam.domain.model.valueobjects.Roles;
 import apx.inc.design_web_services_backend.iam.infrastructure.persistence.jpa.repositories.UserRepository;
+import apx.inc.design_web_services_backend.shared.domain.services.CloudinaryService;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -21,11 +20,13 @@ public class SubmissionCommandServiceImpl implements SubmissionCommandService {
     private final SubmissionRepository submissionRepository;
     private final AssignmentRepository assignmentRepository;
     private final UserRepository userRepository;
+    private final CloudinaryService cloudinaryService ;
 
-    public SubmissionCommandServiceImpl(SubmissionRepository submissionRepository, AssignmentRepository assignmentRepository, UserRepository userRepository) {
+    public SubmissionCommandServiceImpl(SubmissionRepository submissionRepository, AssignmentRepository assignmentRepository, UserRepository userRepository,CloudinaryService cloudinaryService) {
         this.submissionRepository = submissionRepository;
         this.assignmentRepository = assignmentRepository;
         this.userRepository= userRepository;
+        this.cloudinaryService=cloudinaryService;
     }
 
     @Override
@@ -153,6 +154,38 @@ public class SubmissionCommandServiceImpl implements SubmissionCommandService {
             return Optional.of(submission);
         } catch (Exception e) {
             throw new RuntimeException("Error grading submission: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void handle(AddFilesToSubmissionCommand addFilesToSubmissionCommand) {
+        Submission submission = submissionRepository.findById(addFilesToSubmissionCommand.submissionId())
+                .orElseThrow(() -> new IllegalArgumentException("Submission not found with ID: " + addFilesToSubmissionCommand.submissionId()));
+
+        // ✅ Maneja tanto 1 como múltiples archivos
+        for (String fileUrl : addFilesToSubmissionCommand.fileUrls()) {
+            submission.addFileUrl(fileUrl);
+        }
+
+        try {
+            submissionRepository.save(submission);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Failed to add files to submission: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void handle(RemoveFileFromSubmissionCommand removeFileFromSubmissionCommand) {
+        Submission submission = submissionRepository.findById(removeFileFromSubmissionCommand.submissionId())
+                .orElseThrow(() -> new IllegalArgumentException("Submission not found with ID: " + removeFileFromSubmissionCommand.submissionId()));
+
+        submission.removeFileUrl(removeFileFromSubmissionCommand.fileUrl());
+
+        try {
+            submissionRepository.save(submission);
+            cloudinaryService.deleteFile(removeFileFromSubmissionCommand.fileUrl());
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Failed to remove file from submission: " + e.getMessage(), e);
         }
     }
 

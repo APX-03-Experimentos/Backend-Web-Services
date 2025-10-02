@@ -2,14 +2,13 @@ package apx.inc.design_web_services_backend.assigments.application.internal.comm
 
 
 import apx.inc.design_web_services_backend.assigments.domain.model.aggregates.Assignment;
-import apx.inc.design_web_services_backend.assigments.domain.model.commands.CreateAssignmentCommand;
-import apx.inc.design_web_services_backend.assigments.domain.model.commands.DeleteAssignmentCommand;
-import apx.inc.design_web_services_backend.assigments.domain.model.commands.UpdateAssignmentCommand;
+import apx.inc.design_web_services_backend.assigments.domain.model.commands.*;
 import apx.inc.design_web_services_backend.assigments.domain.services.AssignmentCommandService;
 import apx.inc.design_web_services_backend.assigments.infrastructure.persistence.jpa.repositories.AssignmentRepository;
 import apx.inc.design_web_services_backend.courses.infrastructure.persistence.jpa.repositories.CourseRepository;
 import apx.inc.design_web_services_backend.iam.domain.model.valueobjects.Roles;
 import apx.inc.design_web_services_backend.iam.infrastructure.persistence.jpa.repositories.UserRepository;
+import apx.inc.design_web_services_backend.shared.domain.services.CloudinaryService;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -20,11 +19,13 @@ public class AssignmentCommandServiceImpl implements AssignmentCommandService {
     private final AssignmentRepository assignmentRepository;
     private final CourseRepository courseRepository;
     private final UserRepository userRepository;
+    private final CloudinaryService cloudinaryService ;
 
-    public AssignmentCommandServiceImpl(AssignmentRepository assignmentRepository, CourseRepository courseRepository, UserRepository userRepository) {
+    public AssignmentCommandServiceImpl(AssignmentRepository assignmentRepository, CourseRepository courseRepository, UserRepository userRepository,CloudinaryService cloudinaryService) {
         this.assignmentRepository = assignmentRepository;
         this.courseRepository = courseRepository;
         this.userRepository=userRepository;
+        this.cloudinaryService=cloudinaryService;
     }
 
     @Override
@@ -151,4 +152,38 @@ public class AssignmentCommandServiceImpl implements AssignmentCommandService {
         }
 
     }
+
+    @Override
+    public void handle(AddFilesToAssignmentCommand command) {
+        Assignment assignment = assignmentRepository.findById(command.assignmentId())
+                .orElseThrow(() -> new IllegalArgumentException("Assignment not found with ID: " + command.assignmentId()));
+
+        // ✅ Maneja tanto 1 como múltiples archivos
+        for (String fileUrl : command.fileUrls()) {
+            assignment.addFileUrl(fileUrl);
+        }
+
+        try {
+            assignmentRepository.save(assignment);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Failed to add files to assignment: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void handle(RemoveFileFromAssignmentCommand command) {
+        Assignment assignment = assignmentRepository.findById(command.assignmentId())
+                .orElseThrow(() -> new IllegalArgumentException("Assignment not found with ID: " + command.assignmentId()));
+
+        assignment.removeFileUrl(command.fileUrl());
+
+        try {
+            assignmentRepository.save(assignment);
+            cloudinaryService.deleteFile(command.fileUrl());
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Failed to remove file from assignment: " + e.getMessage(), e);
+        }
+    }
+
+
 }

@@ -13,7 +13,8 @@ public class SubmissionResourceFromEntityAssembler {
                 submissionEntity.getContent(),
                 submissionEntity.getScore(),
                 submissionEntity.getImageUrl(),
-                submissionEntity.getState().name()
+                submissionEntity.getState().name(),
+                submissionEntity.getFileUrls()
         );
     }
 }

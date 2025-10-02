@@ -4,10 +4,7 @@ package apx.inc.design_web_services_backend.assigments.domain.model.aggregates;
 import apx.inc.design_web_services_backend.assigments.domain.model.commands.CreateAssignmentCommand;
 import apx.inc.design_web_services_backend.assigments.domain.model.entities.Submission;
 import apx.inc.design_web_services_backend.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -28,6 +25,12 @@ public class Assignment extends AuditableAbstractAggregateRoot<Assignment> {
     @OneToMany(mappedBy = "assignment", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Submission> submissions = new ArrayList<>();
 
+    // NUEVO: Lista para archivos adicionales
+    @ElementCollection
+    @CollectionTable(name = "assignment_files", joinColumns = @JoinColumn(name = "assignment_id"))
+    @Column(name = "file_url")
+    private List<String> fileUrls = new ArrayList<>();
+
     protected Assignment() {
         super();
     }
@@ -47,5 +50,14 @@ public class Assignment extends AuditableAbstractAggregateRoot<Assignment> {
         this.deadline = deadline;
         this.imageUrl = imageUrl;
         return this;
+    }
+
+    // Métodos para archivos adicionales
+    public void addFileUrl(String fileUrl) {
+        this.fileUrls.add(fileUrl);
+    }
+
+    public void removeFileUrl(String fileUrl) {
+        this.fileUrls.remove(fileUrl);
     }
 }

@@ -11,7 +11,8 @@ public class AssignmentResourceFromEntityAssembler {
                 entity.getDescription(),
                 entity.getCourseId(),
                 entity.getDeadline(),
-                entity.getImageUrl()
+                entity.getImageUrl(),
+                entity.getFileUrls()
         );
     }
 }
