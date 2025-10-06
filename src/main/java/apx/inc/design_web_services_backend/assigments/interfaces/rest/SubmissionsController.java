@@ -203,18 +203,18 @@ public class SubmissionsController {
         return ResponseEntity.ok(resources); // 200
     }
 
-    @GetMapping("/students/{studentId}/assignments/{assignmentId}")
+    @GetMapping("/student/{studentId}/assignment/{assignmentId}")
     @Operation(summary = "Get submissions by studentId and assignmentId", description = "Retrieves submissions submitted by a specific student for a specific assignment.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Submissions retrieved successfully"),
             @ApiResponse(responseCode = "404", description = "No submissions found for the given student and assignment")
     })
-    public ResponseEntity<List<SubmissionResource>> getSubmissionsByStudentIdAndChallengeId(@PathVariable Long studentId, @PathVariable Long assignmentId) {
+    public ResponseEntity<List<SubmissionResource>> getSubmissionsByStudentIdAndAssignmentId(@PathVariable Long studentId, @PathVariable Long assignmentId) {
         // Create the query
-        var getSubmissionsByStudentIdAndChallengeIdQuery = new GetSubmissionsByStudentIdAndAssignmentIdQuery(studentId, assignmentId);
+        var getSubmissionsByStudentIdAndAssignmentIdQuery = new GetSubmissionsByStudentIdAndAssignmentIdQuery(studentId, assignmentId);
 
         // Execute the query
-        var submissionsOptional = submissionQueryService.handle(getSubmissionsByStudentIdAndChallengeIdQuery);
+        var submissionsOptional = submissionQueryService.handle(getSubmissionsByStudentIdAndAssignmentIdQuery);
 
         // Verify if submissions were found
         if (submissionsOptional.isEmpty()) {
@@ -229,7 +229,7 @@ public class SubmissionsController {
         return ResponseEntity.ok(submissionResources); // 200 OK
     }
 
-    @GetMapping("/student/{studentId}/group/{courseId}")
+    @GetMapping("/student/{studentId}/course/{courseId}")
     @Operation(summary = "Get submissions by studentId and courseId", description = "Retrieves submissions submitted by a specific student in a specific course.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Submissions retrieved successfully"),
@@ -261,7 +261,7 @@ public class SubmissionsController {
             @ApiResponse(responseCode = "400", description = "Invalid input data"),
             @ApiResponse(responseCode = "404", description = "No submissions found for the given student and course")
     })
-    public ResponseEntity<List<SubmissionResource>> getSubmissionsByGroupId(@PathVariable Long courseId) {
+    public ResponseEntity<List<SubmissionResource>> getSubmissionsByCourseId(@PathVariable Long courseId) {
         try {
             GetSubmissionsByCourseIdQuery query = new GetSubmissionsByCourseIdQuery(courseId);
             var submissions = submissionQueryService.handle(query);
