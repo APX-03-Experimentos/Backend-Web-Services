@@ -139,7 +139,7 @@ public class CoursesController {
     }
 
 
-    @GetMapping(value ="/join/{key}")
+    @PostMapping(value ="/join/{key}")
     @Operation(summary = "Join a course via join code")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Joined course successfully"),
