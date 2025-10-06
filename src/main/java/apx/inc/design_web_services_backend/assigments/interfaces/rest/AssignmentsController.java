@@ -126,10 +126,10 @@ public class AssignmentsController {
     @GetMapping("/{assignmentId}")
     @Operation(summary = "Get a assignment by ID", description = "Retrieves the details of a challenge by its ID.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Challenge retrieved successfully"),
-        @ApiResponse(responseCode = "404", description = "Challenge not found")
+        @ApiResponse(responseCode = "200", description = "Assignment retrieved successfully"),
+        @ApiResponse(responseCode = "404", description = "Assignment not found")
     })
-    public ResponseEntity<AssignmentResource> getChallengeById(@PathVariable Long assignmentId){
+    public ResponseEntity<AssignmentResource> getAssignmentById(@PathVariable Long assignmentId){
         Long authenticatedUserId = getAuthenticatedUserId();
 
         var getAssignmentByIdQuery = new GetAssignmentByIdQuery(assignmentId);
@@ -148,7 +148,7 @@ public class AssignmentsController {
         @ApiResponse(responseCode = "200", description = "Assignment retrieved successfully"),
         @ApiResponse(responseCode = "404", description = "No assignment found")
     })
-    public ResponseEntity<List<AssignmentResource>> getAllChallenges(){
+    public ResponseEntity<List<AssignmentResource>> getAllAssignments(){
         var assignments= assignmentQueryService.handle(new GetAllAssignmentsQuery());
         if (assignments.isEmpty()){
             return ResponseEntity.ok(List.of()); // da una respuesta 404 y vacia
@@ -183,6 +183,10 @@ public class AssignmentsController {
 
     @PostMapping(value = "/{assignmentId}/files", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Add files to assignment")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Files uploaded successfully"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<List<String>> addFilesToAssignment(
             @Parameter(description = "ID of the assignment", required = true)
             @PathVariable Long assignmentId,
@@ -213,6 +217,10 @@ public class AssignmentsController {
 
     @DeleteMapping("/{assignmentId}/files")
     @Operation(summary = "Remove file from assignment")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "File removed successfully"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<Void> removeFileFromAssignment(
             @PathVariable Long assignmentId,
             @RequestParam String fileUrl) {
