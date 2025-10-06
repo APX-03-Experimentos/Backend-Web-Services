@@ -116,7 +116,7 @@ public class AssignmentsController {
         @ApiResponse(responseCode = "204", description = "Assignment deleted successfully"),
         @ApiResponse(responseCode = "404", description = "Assignment not found")
     })
-    public ResponseEntity<AssignmentResource> deleteChallenge(@PathVariable Long assignmentId){
+    public ResponseEntity<AssignmentResource> deleteAssignment(@PathVariable Long assignmentId){
         var deleteAssignmentCommand = new DeleteAssignmentCommand(assignmentId);
         assignmentCommandService.handle(deleteAssignmentCommand);
 
