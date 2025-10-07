@@ -4,6 +4,7 @@ import apx.inc.design_web_services_backend.assigments.domain.model.aggregates.As
 import apx.inc.design_web_services_backend.assigments.domain.model.queries.GetAllAssignmentsQuery;
 import apx.inc.design_web_services_backend.assigments.domain.model.queries.GetAssignmentByIdQuery;
 import apx.inc.design_web_services_backend.assigments.domain.model.queries.GetAssignmentsByCourseIdQuery;
+import apx.inc.design_web_services_backend.assigments.domain.model.queries.GetFilesByAssignmentIdQuery;
 import apx.inc.design_web_services_backend.assigments.domain.services.AssignmentQueryService;
 import apx.inc.design_web_services_backend.assigments.infrastructure.persistence.jpa.repositories.AssignmentRepository;
 import apx.inc.design_web_services_backend.courses.infrastructure.persistence.jpa.repositories.CourseRepository;
@@ -105,5 +106,15 @@ public class AssignmentQueryServiceImpl implements AssignmentQueryService {
 
         // 3. Si pertenece, devolver los Challenges
         return assignmentRepository.findByCourseId(courseId);
+    }
+
+    @Override
+    public List<String> handle(GetFilesByAssignmentIdQuery query) {
+        var assignment = assignmentRepository.findById(query.assignmentId());
+        if (assignment.isEmpty()) {
+            throw new RuntimeException("Assignment not found");
+        }
+
+        return assignment.get().getFileUrls(); // ← Devuelve las URLs directamente
     }
 }

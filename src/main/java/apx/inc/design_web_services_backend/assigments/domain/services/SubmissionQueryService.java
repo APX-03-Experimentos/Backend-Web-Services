@@ -22,4 +22,6 @@ public interface SubmissionQueryService {
     List<Submission> handle(GetSubmissionsByStudentIdAndCourseIdQuery query);
 
     List<Submission> handle(GetSubmissionsByCourseIdQuery query);
+
+    List<String> handle(GetFilesBySubmissionIdQuery query);
 }

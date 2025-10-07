@@ -343,6 +343,29 @@ public class SubmissionsController {
         }
     }
 
+    @GetMapping("/{submissionId}/files")
+    @Operation(summary = "Get all files from a submission", description = "Retrieves all file URLs uploaded to a specific submission.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Files retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "Submission not found or has no files")
+    })
+    public ResponseEntity<List<String>> getFilesBySubmissionId(@PathVariable Long submissionId) {
+        try {
+            var query = new GetFilesBySubmissionIdQuery(submissionId);
+            var files = submissionQueryService.handle(query);
+
+            if (files == null || files.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            return ResponseEntity.ok(files);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+
+
 
 
 }

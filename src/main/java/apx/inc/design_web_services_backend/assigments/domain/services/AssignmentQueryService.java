@@ -4,6 +4,7 @@ import apx.inc.design_web_services_backend.assigments.domain.model.aggregates.As
 import apx.inc.design_web_services_backend.assigments.domain.model.queries.GetAllAssignmentsQuery;
 import apx.inc.design_web_services_backend.assigments.domain.model.queries.GetAssignmentByIdQuery;
 import apx.inc.design_web_services_backend.assigments.domain.model.queries.GetAssignmentsByCourseIdQuery;
+import apx.inc.design_web_services_backend.assigments.domain.model.queries.GetFilesByAssignmentIdQuery;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,4 +16,6 @@ public interface AssignmentQueryService {
     List<Assignment> handle(GetAllAssignmentsQuery getAllAssignmentsQuery);
 
     List<Assignment> handle(GetAssignmentsByCourseIdQuery getAssignmentsByGroupIdQuery, Long userId);
+
+    List<String> handle(GetFilesByAssignmentIdQuery query);
 }

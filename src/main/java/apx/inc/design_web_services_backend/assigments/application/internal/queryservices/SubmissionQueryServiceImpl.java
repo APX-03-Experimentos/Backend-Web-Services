@@ -110,4 +110,13 @@ public class SubmissionQueryServiceImpl implements SubmissionQueryService {
                 })
                 .toList();
     }
+
+    @Override
+    public List<String> handle(GetFilesBySubmissionIdQuery query) {
+        var submissionOpt = submissionRepository.findById(query.submissionId());
+        if (submissionOpt.isEmpty()) return List.of();
+
+        var submission = submissionOpt.get();
+        return submission.getFileUrls();
+    }
 }

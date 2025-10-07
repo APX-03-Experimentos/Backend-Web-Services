@@ -6,6 +6,7 @@ import apx.inc.design_web_services_backend.assigments.domain.model.commands.Remo
 import apx.inc.design_web_services_backend.assigments.domain.model.queries.GetAllAssignmentsQuery;
 import apx.inc.design_web_services_backend.assigments.domain.model.queries.GetAssignmentByIdQuery;
 import apx.inc.design_web_services_backend.assigments.domain.model.queries.GetAssignmentsByCourseIdQuery;
+import apx.inc.design_web_services_backend.assigments.domain.model.queries.GetFilesByAssignmentIdQuery;
 import apx.inc.design_web_services_backend.assigments.domain.services.AssignmentCommandService;
 import apx.inc.design_web_services_backend.assigments.domain.services.AssignmentQueryService;
 import apx.inc.design_web_services_backend.assigments.interfaces.rest.resource.AssignmentResource;
@@ -231,6 +232,28 @@ public class AssignmentsController {
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/{assignmentId}/files")
+    @Operation(summary = "Get all files from an assignment")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Files retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "Assignment not found")
+    })
+    public ResponseEntity<List<String>> getFilesByAssignmentId(@PathVariable Long assignmentId) {
+
+        try {
+            var query = new GetFilesByAssignmentIdQuery(assignmentId);
+            var fileUrls = assignmentQueryService.handle(query);
+
+            if (fileUrls == null || fileUrls.isEmpty()) {
+                return ResponseEntity.ok(List.of());
+            }
+
+            return ResponseEntity.ok(fileUrls);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 
