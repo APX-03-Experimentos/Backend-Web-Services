@@ -7,6 +7,7 @@ public class UpdateUserCommandFromResourceAssembler {
     public static UpdateUserCommand toCommandFromResource(UpdateUserResource updateUserResource){
         return new UpdateUserCommand(
                 updateUserResource.userName(),
-                updateUserResource.password());
+                updateUserResource.password(),
+                updateUserResource.roles());
     }
 }

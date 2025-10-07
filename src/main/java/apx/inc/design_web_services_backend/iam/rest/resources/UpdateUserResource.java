@@ -1,8 +1,14 @@
 package apx.inc.design_web_services_backend.iam.rest.resources;
 
+import apx.inc.design_web_services_backend.iam.domain.model.entities.Role;
+import apx.inc.design_web_services_backend.iam.domain.model.valueobjects.Roles;
+
+import java.util.List;
+
 public record UpdateUserResource(
         String userName,
-        String password
+        String password,
+        List<Roles> roles
 ) {
     public UpdateUserResource {
         if (userName == null || userName.isBlank()) {

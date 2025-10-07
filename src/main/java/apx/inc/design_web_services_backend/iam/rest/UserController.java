@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -67,36 +68,34 @@ public class UserController {
 //            return ResponseEntity.badRequest().build();
 //        }
 //    }
-
-    @PutMapping
-    @Operation(summary = "Update a user", description = "Update a user by its ID.")
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/{id}")
+    @Operation(summary = "Update a user by ID", description = "Update a specific user (admin operation).")
     @ApiResponses(value = {
-            @ApiResponse (responseCode = "200", description = "user updated successfully"),
-            @ApiResponse (responseCode = "400", description = "Invalid input data")
+            @ApiResponse(responseCode = "200", description = "User updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data"),
+            @ApiResponse(responseCode = "404", description = "User not found")
     })
-    public ResponseEntity<UserResource> updateUser(@RequestBody UpdateUserResource updateUserResource){
+    public ResponseEntity<UserResource> updateUserById(
+            @PathVariable Long id,
+            @RequestBody UpdateUserResource updateUserResource) {
 
-        Long userId = getUserIdFromContext();
+        // 1️⃣ Convertir el recurso a comando
+        UpdateUserCommand command = UpdateUserCommandFromResourceAssembler
+                .toCommandFromResource(updateUserResource);
 
-        //Convertir el recurso a comando
-        UpdateUserCommand updateUserCommand = UpdateUserCommandFromResourceAssembler.toCommandFromResource(updateUserResource);
+        // 2️⃣ Ejecutar el comando pasando el ID explícito
+        var updatedUser = userCommandService.handle(command, id);
 
-        // Ejecutar el comando
-        var userOptional = userCommandService.handle(updateUserCommand,userId);
-
-        // Verificar si el estudiante fue actualizado exitosamente
-        if (userOptional.isPresent()) {
-            var userResource = UserResourceFromEntityAssembler.toResourceFromEntity(userOptional.get());
-            return ResponseEntity.ok(userResource); // 200 OK
-        } else {
-            return ResponseEntity.badRequest().build();
-        }
-
+        // 3️⃣ Retornar respuesta
+        return updatedUser.map(user ->
+                ResponseEntity.ok(UserResourceFromEntityAssembler.toResourceFromEntity(user))
+        ).orElse(ResponseEntity.notFound().build());
     }
 
 
 
-
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{userId}")
     @Operation(summary = "Delete a user", description = "Deletes a user by its ID.")
     @ApiResponses(value = {

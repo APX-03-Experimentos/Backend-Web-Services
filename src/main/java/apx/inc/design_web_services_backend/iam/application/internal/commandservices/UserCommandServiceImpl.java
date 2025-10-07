@@ -54,7 +54,8 @@ public class UserCommandServiceImpl implements UserCommandService {
         // ✅ Crea un nuevo comando con la contraseña cifrada
         var commandWithEncodedPassword = new UpdateUserCommand(
                 updateUserCommand.userName(),
-                encodedPassword
+                encodedPassword,
+                updateUserCommand.roles()
         );
 
         try{
