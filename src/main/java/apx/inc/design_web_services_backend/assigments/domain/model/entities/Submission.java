@@ -9,6 +9,7 @@ import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 @Getter
 @Entity
@@ -42,7 +43,7 @@ public class Submission extends AuditableAbstractAggregateRoot<Submission> {
         this.studentId = command.studentId();
         this.content = command.content();
         this.score = 0;
-        this.imageUrl = command.imageUrl();
+        this.imageUrl = generatePicsumImageUrl(command.content());
         this.state = States.NOT_GRADED; // Estado inicial
     }
 
@@ -73,6 +74,15 @@ public class Submission extends AuditableAbstractAggregateRoot<Submission> {
 
     public void removeFileUrl(String fileUrl) {
         this.fileUrls.remove(fileUrl);
+    }
+
+
+    private String generatePicsumImageUrl(String key) {
+        // Generar un seed único basado en el título del curso
+        int seed = key != null ? Math.abs(key.hashCode()) : new Random().nextInt(1000);
+
+        // URL de Picsum con dimensiones y seed único
+        return "https://picsum.photos/400/300?random=" + seed;
     }
 
 }
