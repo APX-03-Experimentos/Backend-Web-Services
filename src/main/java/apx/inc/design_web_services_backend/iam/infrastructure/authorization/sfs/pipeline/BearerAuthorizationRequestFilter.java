@@ -62,4 +62,10 @@ public class BearerAuthorizationRequestFilter extends OncePerRequestFilter {
         }
         filterChain.doFilter(request, response);
     }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getServletPath();
+        return path.startsWith("/ws-notifications"); // No filtrar el endpoint WS
+    }
 }

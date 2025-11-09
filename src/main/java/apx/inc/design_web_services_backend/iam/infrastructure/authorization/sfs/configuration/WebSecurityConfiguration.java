@@ -88,7 +88,8 @@ public class WebSecurityConfiguration {
                                 "/",
                                 "/index.html",
                                 "/favicon.ico",
-                                "/error"
+                                "/error",
+                                "/ws-notifications/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
