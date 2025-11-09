@@ -11,6 +11,7 @@ public class NotificationResourceFromEntityAssembler {
                 notification.getTitle(),
                 notification.getMessage(),
                 notification.getType().toString(),
+                notification.getRead(),
                 notification.getOcurredAt(),
                 notification.getSourceCourseId(),
                 notification.getSourceAssignmentId()

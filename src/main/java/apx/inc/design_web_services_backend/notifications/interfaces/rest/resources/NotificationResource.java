@@ -8,6 +8,7 @@ public record NotificationResource(
         String title,
         String message,
         String type,
+        boolean read,
         LocalDateTime ocurredAt,
         Long sourceCourseId,
         Long sourceAssignmentId

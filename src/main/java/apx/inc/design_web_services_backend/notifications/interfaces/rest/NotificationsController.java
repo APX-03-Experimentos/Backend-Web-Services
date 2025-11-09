@@ -108,7 +108,7 @@ public class NotificationsController {
             @ApiResponse(responseCode = "404", description = "Notification not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PatchMapping("/{id}/read")
+    @PutMapping("/{id}/read")
     public ResponseEntity<NotificationResource> markNotificationAsRead(@PathVariable Long id) {
         try {
             // Transform de resource to command
