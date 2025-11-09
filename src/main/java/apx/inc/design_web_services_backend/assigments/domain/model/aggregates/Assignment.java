@@ -70,4 +70,6 @@ public class Assignment extends AuditableAbstractAggregateRoot<Assignment> {
         // URL de Picsum con dimensiones y seed único
         return "https://picsum.photos/400/300?random=" + seed;
     }
+
+
 }
