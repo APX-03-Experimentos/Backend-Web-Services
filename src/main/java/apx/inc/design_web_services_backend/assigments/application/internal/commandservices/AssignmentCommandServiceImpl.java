@@ -3,17 +3,22 @@ package apx.inc.design_web_services_backend.assigments.application.internal.comm
 
 import apx.inc.design_web_services_backend.assigments.domain.model.aggregates.Assignment;
 import apx.inc.design_web_services_backend.assigments.domain.model.commands.*;
+import apx.inc.design_web_services_backend.assigments.domain.model.events.AssignmentCreatedAlertEvent;
+import apx.inc.design_web_services_backend.assigments.domain.model.events.AssignmentFileAddedAlertEvent;
 import apx.inc.design_web_services_backend.assigments.domain.services.AssignmentCommandService;
 import apx.inc.design_web_services_backend.assigments.infrastructure.persistence.jpa.repositories.AssignmentRepository;
 import apx.inc.design_web_services_backend.courses.infrastructure.persistence.jpa.repositories.CourseRepository;
 import apx.inc.design_web_services_backend.iam.domain.model.valueobjects.Roles;
 import apx.inc.design_web_services_backend.iam.infrastructure.persistence.jpa.repositories.UserRepository;
 import apx.inc.design_web_services_backend.shared.domain.services.CloudinaryService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class AssignmentCommandServiceImpl implements AssignmentCommandService {
 
     private final AssignmentRepository assignmentRepository;
@@ -21,12 +26,9 @@ public class AssignmentCommandServiceImpl implements AssignmentCommandService {
     private final UserRepository userRepository;
     private final CloudinaryService cloudinaryService ;
 
-    public AssignmentCommandServiceImpl(AssignmentRepository assignmentRepository, CourseRepository courseRepository, UserRepository userRepository,CloudinaryService cloudinaryService) {
-        this.assignmentRepository = assignmentRepository;
-        this.courseRepository = courseRepository;
-        this.userRepository=userRepository;
-        this.cloudinaryService=cloudinaryService;
-    }
+    private final ApplicationEventPublisher applicationEventPublisher;
+
+
 
     @Override
     public Long handle(CreateAssignmentCommand createAssignmentCommand, Long userId) {
@@ -68,8 +70,17 @@ public class AssignmentCommandServiceImpl implements AssignmentCommandService {
 
         var assignment = new Assignment(createAssignmentCommand);
         try {
-            assignmentRepository.save(assignment);
-            return assignment.getId();
+            var savedAssignment = assignmentRepository.save(assignment);
+
+            applicationEventPublisher.publishEvent(new AssignmentCreatedAlertEvent(
+                    this,
+                    savedAssignment.getId(),
+                    savedAssignment.getTitle(),
+                    savedAssignment.getCourseId(),
+                    savedAssignment.getDeadline()
+            ));
+
+            return savedAssignment.getId();
         } catch (Exception e) {
             throw new IllegalArgumentException("Failed to create assignment: " + e.getMessage(), e);
         }
@@ -161,6 +172,15 @@ public class AssignmentCommandServiceImpl implements AssignmentCommandService {
         // ✅ Maneja tanto 1 como múltiples archivos
         for (String fileUrl : command.fileUrls()) {
             assignment.addFileUrl(fileUrl);
+
+            // ✅ PUBLICAR EVENTO por cada archivo agregado
+            applicationEventPublisher.publishEvent(new AssignmentFileAddedAlertEvent(
+                    this,
+                    assignment.getId(),
+                    assignment.getTitle(),
+                    assignment.getCourseId()
+            ));
+
         }
 
         try {

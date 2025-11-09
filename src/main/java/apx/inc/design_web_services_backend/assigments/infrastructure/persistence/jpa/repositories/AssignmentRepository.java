@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,5 +21,7 @@ public interface AssignmentRepository extends JpaRepository<Assignment,Long> {
 
     Optional<Assignment> findByTitleAndCourseId(String title, Long courseId);
 
-
+    //para el event de deadline approaching
+    @Query("SELECT a FROM Assignment a WHERE a.deadline BETWEEN :start AND :end")
+    List<Assignment> findByDeadlineBetween(@Param("start") Date start, @Param("end") Date end);
 }
