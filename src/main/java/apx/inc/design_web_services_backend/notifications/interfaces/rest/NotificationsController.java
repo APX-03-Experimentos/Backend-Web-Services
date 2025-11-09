@@ -2,6 +2,7 @@ package apx.inc.design_web_services_backend.notifications.interfaces.rest;
 
 import apx.inc.design_web_services_backend.notifications.domain.model.aggregates.Notification;
 import apx.inc.design_web_services_backend.notifications.domain.model.commands.CreateNotificationCommand;
+import apx.inc.design_web_services_backend.notifications.domain.model.commands.MarkNotificationAsReadCommand;
 import apx.inc.design_web_services_backend.notifications.domain.model.queries.GetAllNotificationsQuery;
 import apx.inc.design_web_services_backend.notifications.domain.model.queries.GetNotificationByIdQuery;
 import apx.inc.design_web_services_backend.notifications.domain.model.queries.GetNotificationsByUserIdQuery;
@@ -41,12 +42,16 @@ public class NotificationsController {
     @GetMapping
     public ResponseEntity<List<NotificationResource>> getAllNotifications() {
         try {
+            // Transform de resource to query
             var query = new GetAllNotificationsQuery();
+            // Handle the query
             var notifications = notificationQueryService.handle(query);
+            // Transform entities to resources
             var resources = notifications.stream()
                     .map(NotificationResourceFromEntityAssembler::toResourceFromEntity)
                     .toList();
-            return ResponseEntity.ok(resources);
+            // Return the response
+            return ResponseEntity.status(200).body(resources);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
@@ -80,12 +85,40 @@ public class NotificationsController {
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<NotificationResource>> getNotificationsByUserId(@PathVariable Long userId) {
         try {
+            // Transform de resource to query
             var query = new GetNotificationsByUserIdQuery(userId);
+
+            // Handle the query
             var notifications = notificationQueryService.handle(query);
+
+            // Transform entities to resources
             var resources = notifications.stream()
                     .map(NotificationResourceFromEntityAssembler::toResourceFromEntity)
                     .toList();
-            return ResponseEntity.ok(resources);
+            // Return the response
+            return ResponseEntity.status(200).body(resources);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @Operation(summary = "Mark notification as read")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Notification marked as read successfully"),
+            @ApiResponse(responseCode = "404", description = "Notification not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @PatchMapping("/{id}/read")
+    public ResponseEntity<NotificationResource> markNotificationAsRead(@PathVariable Long id) {
+        try {
+            // Transform de resource to command
+            var command = new MarkNotificationAsReadCommand(id);
+            // Handle the command
+            var notification = notificationCommandService.handle(command);
+            // Transform entity to resource and return response
+            return notification.map(NotificationResourceFromEntityAssembler::toResourceFromEntity)
+                    .map(ResponseEntity::ok)
+                    .orElse(ResponseEntity.notFound().build());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }

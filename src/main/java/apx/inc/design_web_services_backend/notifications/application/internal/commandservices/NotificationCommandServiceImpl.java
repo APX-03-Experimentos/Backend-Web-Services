@@ -3,10 +3,13 @@ package apx.inc.design_web_services_backend.notifications.application.internal.c
 import apx.inc.design_web_services_backend.notifications.application.internal.outboundservices.acl.ExternalIamService;
 import apx.inc.design_web_services_backend.notifications.domain.model.aggregates.Notification;
 import apx.inc.design_web_services_backend.notifications.domain.model.commands.CreateNotificationCommand;
+import apx.inc.design_web_services_backend.notifications.domain.model.commands.MarkNotificationAsReadCommand;
 import apx.inc.design_web_services_backend.notifications.domain.services.NotificationCommandService;
 import apx.inc.design_web_services_backend.notifications.infrastructure.persistence.jpa.repositories.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -34,5 +37,16 @@ public class NotificationCommandServiceImpl implements NotificationCommandServic
         } catch (Exception e){
             throw new IllegalArgumentException(e.getMessage());
         }
+    }
+
+    @Override
+    public Optional<Notification> handle(MarkNotificationAsReadCommand command) {
+        var notificationOpt = notificationRepository.findById(command.notificationId());
+        if (notificationOpt.isPresent()) {
+            notificationOpt.get().markAsRead();
+            notificationRepository.save(notificationOpt.get());
+            return notificationOpt;
+        }
+        return Optional.empty();
     }
 }
