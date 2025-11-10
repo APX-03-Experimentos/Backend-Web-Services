@@ -22,7 +22,7 @@ public class DeadlineAlertScheduler {
     private final AssignmentRepository assignmentRepository;
     private final ApplicationEventPublisher eventPublisher;
 
-    @Scheduled(fixedRate = 300000) // Ejecutar cada 5 minutos (300,000 ms)
+    @Scheduled(cron = "0 0 8,12,16,20 * * *") // 8AM, 12PM, 4PM, 8PM
     public void checkApproachingDeadlines() {
 
         LocalDateTime now = LocalDateTime.now();
