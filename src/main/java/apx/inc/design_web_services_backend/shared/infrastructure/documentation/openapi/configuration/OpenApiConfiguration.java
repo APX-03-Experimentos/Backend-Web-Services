@@ -43,6 +43,7 @@ public class OpenApiConfiguration {
                         new Server()
                                 .url("https://api.apxlearnhive.com")
                                 .description("Production Server")
+
                 ));
 
         // Add security scheme
