@@ -66,6 +66,9 @@ public class BearerAuthorizationRequestFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
-        return path.startsWith("/ws-notifications"); // No filtrar el endpoint WS
+
+        // ✅ AGREGA ESTA LÍNEA para excluir autenticación
+        return path.startsWith("/api/v1/authentication") ||
+                path.startsWith("/ws-notifications"); // Ya tenías esto
     }
 }
