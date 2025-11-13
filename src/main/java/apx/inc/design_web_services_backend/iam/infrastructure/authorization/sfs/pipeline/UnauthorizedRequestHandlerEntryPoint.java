@@ -11,30 +11,30 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
-/**
- * Unauthorized Request Handler.
- * <p>
- * This class is responsible for handling unauthorized requests.
- * It is used by the Spring Security framework to handle unauthorized requests.
- * It implements the AuthenticationEntryPoint interface.
- * </p>
- * @see AuthenticationEntryPoint
- */
-
 @Component
 public class UnauthorizedRequestHandlerEntryPoint implements AuthenticationEntryPoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UnauthorizedRequestHandlerEntryPoint.class);
 
-    /**
-     * This method is called by the Spring Security framework when an unauthorized request is detected.
-     * @param request The request that caused the exception
-     * @param response The response that will be sent to the client
-     * @param authenticationException The exception that caused the invocation
-     */
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authenticationException) throws IOException, ServletException {
-        LOGGER.error("Unauthorized request: {}", authenticationException.getMessage());
-        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized request detected");
+
+        String path = request.getServletPath();
+        String method = request.getMethod();
+
+        // ✅ AGREGAR ESTA VERIFICACIÓN - NO bloquear endpoints públicos
+        if (path.startsWith("/authentication") ||
+                path.startsWith("/ws-notifications") ||
+                path.startsWith("/v3/api-docs") ||
+                path.startsWith("/swagger-ui")) {
+
+            LOGGER.info("🔍 SKIPPING UnauthorizedHandler for public endpoint: {} {}", method, path);
+            // ✅ Dejar que el request continúe hacia el controller
+            return;
+        }
+
+        // ✅ Solo ejecutar para endpoints protegidos
+        LOGGER.error("Unauthorized request for protected endpoint: {} {}", method, path);
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Full authentication is required to access this resource");
     }
 }
