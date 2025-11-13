@@ -38,27 +38,14 @@ public class AuthenticationController {
             }
     )
     public ResponseEntity<AuthenticatedUserResource> signIn(@RequestBody SignInResource signInResource){
-        System.out.println("🎯 SIGN-IN CONTROLLER - INICIANDO");
-        System.out.println("🎯 SIGN-IN CONTROLLER - Username: " + signInResource.userName());
+        var signInCommand= SignInCommandFromResourceAssembler.toCommandFromResource(signInResource);
 
-        var signInCommand = SignInCommandFromResourceAssembler.toCommandFromResource(signInResource);
         var authenticatedUser = userCommandService.handle(signInCommand);
 
-        System.out.println("🎯 SIGN-IN CONTROLLER - Resultado: " + (authenticatedUser.isPresent() ? "ÉXITO" : "FALLÓ"));
-
         if (authenticatedUser.isEmpty()){
-            System.out.println("❌ SIGN-IN CONTROLLER - Credenciales inválidas");
-            return ResponseEntity.status(401).build();
+            return ResponseEntity.notFound().build();
         }
-
-        var authenticatedUserResource = AuthenticatedUserResourceFromEntityAssembler.toResourceFromEntity(
-                authenticatedUser.get().getLeft(),
-                authenticatedUser.get().getRight()
-        );
-
-        System.out.println("✅ SIGN-IN CONTROLLER - Login exitoso para: " + authenticatedUserResource.username());
-        System.out.println("✅ SIGN-IN CONTROLLER - Token: " + authenticatedUserResource.token());
-
+        var authenticatedUserResource = AuthenticatedUserResourceFromEntityAssembler.toResourceFromEntity(authenticatedUser.get().getLeft(), authenticatedUser.get().getRight());
         return ResponseEntity.ok(authenticatedUserResource);
     }
 
