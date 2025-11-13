@@ -51,7 +51,7 @@ public class BearerAuthorizationRequestFilter extends OncePerRequestFilter {
         String method = request.getMethod();
 
         // ✅ VERIFICACIÓN EXPLÍCITA - Saltar endpoints públicos
-        if (path.startsWith("/api/v1/authentication") ||
+        if (path.startsWith("/authentication") ||
                 path.startsWith("/ws-notifications") ||
                 path.startsWith("/v3/api-docs") ||
                 path.startsWith("/swagger-ui")) {
@@ -82,7 +82,7 @@ public class BearerAuthorizationRequestFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
-        boolean shouldSkip = path.startsWith("/api/v1/authentication") ||
+        boolean shouldSkip = path.startsWith("/authentication") ||
                 path.startsWith("/ws-notifications") ||
                 path.startsWith("/v3/api-docs") ||
                 path.startsWith("/swagger-ui");
