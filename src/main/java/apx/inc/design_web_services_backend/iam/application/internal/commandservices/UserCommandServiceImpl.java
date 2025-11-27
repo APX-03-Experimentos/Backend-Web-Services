@@ -7,25 +7,24 @@ import apx.inc.design_web_services_backend.iam.domain.model.commands.*;
 import apx.inc.design_web_services_backend.iam.domain.services.UserCommandService;
 import apx.inc.design_web_services_backend.iam.infrastructure.persistence.jpa.repositories.RoleRepository;
 import apx.inc.design_web_services_backend.iam.infrastructure.persistence.jpa.repositories.UserRepository;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class UserCommandServiceImpl implements UserCommandService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final HashingService hashingService;
     private final TokenService tokenService;
+    private final RecaptchaService recaptchaService;
 
-    public UserCommandServiceImpl(UserRepository userRepository, RoleRepository roleRepository, HashingService hashingService, TokenService tokenService) {
-        this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
-        this.hashingService = hashingService;
-        this.tokenService = tokenService;
-    }
+
 
     @Override
     public Optional<User> handle(UpdateUserCommand updateUserCommand, Long userId) {
@@ -35,9 +34,9 @@ public class UserCommandServiceImpl implements UserCommandService {
         }
 
         //Check if a user with the same email already exists
-        var existingUserWithEmail = userRepository.findByUserName(updateUserCommand.userName());
+        var existingUserWithEmail = userRepository.findByUsername(updateUserCommand.username());
         if (existingUserWithEmail.isPresent() && !existingUserWithEmail.get().getId().equals(userId)) {
-            throw new IllegalArgumentException("User with userName " + updateUserCommand.userName() + " already exists");
+            throw new IllegalArgumentException("User with username " + updateUserCommand.username() + " already exists");
         }
 
         var userToUpdate = userOptional.get();
@@ -53,7 +52,7 @@ public class UserCommandServiceImpl implements UserCommandService {
 
         // ✅ Crea un nuevo comando con la contraseña cifrada
         var commandWithEncodedPassword = new UpdateUserCommand(
-                updateUserCommand.userName(),
+                updateUserCommand.username(),
                 encodedPassword,
                 updateUserCommand.roles()
         );
@@ -113,29 +112,35 @@ public class UserCommandServiceImpl implements UserCommandService {
 
     @Override
     public Optional<ImmutablePair<User, String>> handle(SignInCommand signInCommand) {
-        var user = userRepository.findByUserName(signInCommand.userName());
+        var user = userRepository.findByUsername(signInCommand.username());
 
         if (user.isEmpty()) {
-            throw new IllegalArgumentException("User with user name " + signInCommand.userName() + " not found");
+            throw new IllegalArgumentException("User with user name " + signInCommand.username() + " not found");
         }
         if (!hashingService.matches(signInCommand.password(), user.get().getPassword())) {
             throw new IllegalArgumentException("Invalid password");
         }
-        var token = tokenService.generateToken(user.get().getUserName());
+        var token = tokenService.generateToken(user.get().getUsername());
         return Optional.of(ImmutablePair.of(user.get(), token));
     }
 
     @Override
     public Optional<User> handle(SignUpCommand signUpCommand) {
-        if (userRepository.existsByUserName(signUpCommand.userName())) {
-            throw new IllegalArgumentException("User with user name " + signUpCommand.userName() + " already exists");
+        boolean isCaptchaValid = recaptchaService.verifyRecaptcha(signUpCommand.recaptchaToken());
+
+        if (!isCaptchaValid) {
+            throw new IllegalArgumentException("CAPTCHA verification failed");
+        }
+
+        if (userRepository.existsByUsername(signUpCommand.username())) {
+            throw new IllegalArgumentException("User with user name " + signUpCommand.username() + " already exists");
         }
         var roles= signUpCommand.roles().stream().map(
                 role->roleRepository.findByName(role)
                         .orElseThrow(() -> new IllegalArgumentException("Role " + role + " not found"))
                 ).toList();
-        var user = new User(signUpCommand.userName(), hashingService.encode(signUpCommand.password()), roles);
+        var user = new User(signUpCommand.username(), hashingService.encode(signUpCommand.password()), roles);
         userRepository.save(user);
-        return userRepository.findByUserName(signUpCommand.userName());
+        return userRepository.findByUsername(signUpCommand.username());
     }
 }

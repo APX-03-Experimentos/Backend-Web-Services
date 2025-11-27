@@ -5,13 +5,11 @@ import apx.inc.design_web_services_backend.iam.domain.model.queries.*;
 //import apx.inc.design_web_services_backend.iam.domain.model.valueobjects.ProfileInGroup;
 import apx.inc.design_web_services_backend.iam.domain.services.UserQueryService;
 import apx.inc.design_web_services_backend.iam.infrastructure.persistence.jpa.repositories.UserRepository;
-import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -29,8 +27,8 @@ public class UserQueryServiceImpl implements UserQueryService {
     }
 
     @Override
-    public Optional<User> handle(GetUserByUserNameQuery getUserByUserNameQuery) {
-        return userRepository.findByUserName(getUserByUserNameQuery.userName());
+    public Optional<User> handle(GetUserByUsernameQuery getUserByUsernameQuery) {
+        return userRepository.findByUsername(getUserByUsernameQuery.username());
     }
 
     @Override

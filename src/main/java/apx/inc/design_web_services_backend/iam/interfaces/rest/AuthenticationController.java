@@ -65,9 +65,5 @@ public class AuthenticationController {
 
     }
 
-    // ✅ Handler para OPTIONS (preflight)
-    @RequestMapping(value = "/**", method = RequestMethod.OPTIONS)
-    public ResponseEntity<Void> handleOptions() {
-        return ResponseEntity.ok().build();
-    }
+
 }
