@@ -143,4 +143,19 @@ public class UserCommandServiceImpl implements UserCommandService {
         userRepository.save(user);
         return userRepository.findByUsername(signUpCommand.username());
     }
+
+    @Override
+    public Optional<User> handle(SignUpCommandMobile signUpCommandMobile) {
+
+        if (userRepository.existsByUsername(signUpCommandMobile.username())) {
+            throw new IllegalArgumentException("User with user name " + signUpCommandMobile.username() + " already exists");
+        }
+        var roles= signUpCommandMobile.roles().stream().map(
+                role->roleRepository.findByName(role)
+                        .orElseThrow(() -> new IllegalArgumentException("Role " + role + " not found"))
+        ).toList();
+        var user = new User(signUpCommandMobile.username(), hashingService.encode(signUpCommandMobile.password()), roles);
+        userRepository.save(user);
+        return userRepository.findByUsername(signUpCommandMobile.username());
+    }
 }

@@ -1,14 +1,8 @@
 package apx.inc.design_web_services_backend.iam.interfaces.rest;
 
 import apx.inc.design_web_services_backend.iam.domain.services.UserCommandService;
-import apx.inc.design_web_services_backend.iam.interfaces.rest.resources.AuthenticatedUserResource;
-import apx.inc.design_web_services_backend.iam.interfaces.rest.resources.SignInResource;
-import apx.inc.design_web_services_backend.iam.interfaces.rest.resources.SignUpResource;
-import apx.inc.design_web_services_backend.iam.interfaces.rest.resources.UserResource;
-import apx.inc.design_web_services_backend.iam.interfaces.rest.transform.AuthenticatedUserResourceFromEntityAssembler;
-import apx.inc.design_web_services_backend.iam.interfaces.rest.transform.SignInCommandFromResourceAssembler;
-import apx.inc.design_web_services_backend.iam.interfaces.rest.transform.SignUpCommandFromResourceAssembler;
-import apx.inc.design_web_services_backend.iam.interfaces.rest.transform.UserResourceFromEntityAssembler;
+import apx.inc.design_web_services_backend.iam.interfaces.rest.resources.*;
+import apx.inc.design_web_services_backend.iam.interfaces.rest.transform.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -57,6 +51,22 @@ public class AuthenticationController {
     public ResponseEntity<UserResource> signUp(@RequestBody SignUpResource signUpResource) {
         var signUpCommand = SignUpCommandFromResourceAssembler.toCommandFromResource(signUpResource);
         var user = userCommandService.handle(signUpCommand);
+        if (user.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        var userResource = UserResourceFromEntityAssembler.toResourceFromEntity(user.get());
+        return new ResponseEntity<>(userResource, HttpStatus.CREATED);
+
+    }
+
+    @PostMapping("/sign-up/mobile")
+    @Operation(summary = "Sign-up mobile", description = "Sign-up mobile with the provided credentials.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "User created successfully."),
+            @ApiResponse(responseCode = "400", description = "Bad request.")})
+    public ResponseEntity<UserResource> signUpMobile(@RequestBody SignUpMobileResource signUpMobileResource) {
+        var signUpMobileCommand = SignUpCommandMobileFromResourceAssembler.toCommandFromResource(signUpMobileResource);
+        var user = userCommandService.handle(signUpMobileCommand);
         if (user.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
