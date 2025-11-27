@@ -7,7 +7,7 @@ import java.util.List;
 
 public record UserResource(
         Long id,
-        String userName,
+        String username,
         List<Roles> roles,
         List<CourseResource> courseResources  // ← Lista de cursos del usuario
 ) { }

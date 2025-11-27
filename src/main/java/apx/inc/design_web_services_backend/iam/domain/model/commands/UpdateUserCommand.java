@@ -6,11 +6,11 @@ import apx.inc.design_web_services_backend.iam.domain.model.valueobjects.Roles;
 import java.util.List;
 
 public record UpdateUserCommand(
-        String userName,
+        String username,
         String password,
         List<Roles> roles) {
     public UpdateUserCommand{
-        if (userName==null || userName.isBlank() ) {
+        if (username==null || username.isBlank() ) {
             throw new IllegalArgumentException("Username cannot be empty");
         }
         if (password==null || password.isBlank() ) {

@@ -6,7 +6,7 @@ import apx.inc.design_web_services_backend.iam.interfaces.rest.resources.UpdateU
 public class UpdateUserCommandFromResourceAssembler {
     public static UpdateUserCommand toCommandFromResource(UpdateUserResource updateUserResource){
         return new UpdateUserCommand(
-                updateUserResource.userName(),
+                updateUserResource.username(),
                 updateUserResource.password(),
                 updateUserResource.roles());
     }

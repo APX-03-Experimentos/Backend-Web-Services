@@ -196,7 +196,7 @@ public class UserController {
     })
     public ResponseEntity<UserResource> getUserByuserName(@PathVariable String userName) {
         //Create the query to get the user by userName
-        GetUserByUserNameQuery getUserByUserNameQuery =new GetUserByUserNameQuery(userName);
+        GetUserByUsernameQuery getUserByUserNameQuery =new GetUserByUsernameQuery(userName);
 
         // Execute the query
         var userOptional =userQueryService.handle(getUserByUserNameQuery);

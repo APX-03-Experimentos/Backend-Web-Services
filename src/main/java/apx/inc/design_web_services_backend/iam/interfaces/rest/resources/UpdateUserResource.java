@@ -6,12 +6,12 @@ import apx.inc.design_web_services_backend.iam.domain.model.valueobjects.Roles;
 import java.util.List;
 
 public record UpdateUserResource(
-        String userName,
+        String username,
         String password,
         List<Roles> roles
 ) {
     public UpdateUserResource {
-        if (userName == null || userName.isBlank()) {
+        if (username == null || username.isBlank()) {
             throw new IllegalArgumentException("Email cannot be null or blank");
         }
         if (password == null || password.isBlank()) {

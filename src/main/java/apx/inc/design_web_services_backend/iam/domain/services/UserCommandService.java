@@ -17,5 +17,7 @@ public interface UserCommandService {
 
     Optional<User> handle(SignUpCommand signUpCommand);
 
+    Optional<User> handle(SignUpCommandMobile signUpCommandMobile);
+
     Optional<User> handle(LeaveCourseCommand leaveCourseCommand);
 }

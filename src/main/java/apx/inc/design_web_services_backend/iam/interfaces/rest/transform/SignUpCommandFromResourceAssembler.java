@@ -6,9 +6,10 @@ import apx.inc.design_web_services_backend.iam.interfaces.rest.resources.SignUpR
 public class SignUpCommandFromResourceAssembler {
     public static SignUpCommand toCommandFromResource(SignUpResource signUpResource) {
         return new SignUpCommand(
-                signUpResource.userName(),
+                signUpResource.username(),
                 signUpResource.password(),
-                signUpResource.roles()
+                signUpResource.roles(),
+                signUpResource.recaptchaToken()
         );
     }
 }
