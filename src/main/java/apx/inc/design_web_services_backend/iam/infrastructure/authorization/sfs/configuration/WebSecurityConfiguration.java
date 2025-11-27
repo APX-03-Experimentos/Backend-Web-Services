@@ -75,6 +75,7 @@ public class WebSecurityConfiguration {
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
+                                "/api/captcha/**",
                                 "/api/v1/authentication/**",
                                 "/v3/api-docs/**",
                                 "/api-docs/**",

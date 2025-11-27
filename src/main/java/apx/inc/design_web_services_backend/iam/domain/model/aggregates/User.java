@@ -15,7 +15,7 @@ import java.util.Set;
 @Entity
 public class User extends AuditableAbstractAggregateRoot <User>{
 
-    private String userName;
+    private String username;
     private String password;
 
     @ManyToMany(fetch = FetchType.EAGER,cascade = {CascadeType.PERSIST, CascadeType.MERGE})
@@ -40,21 +40,21 @@ public class User extends AuditableAbstractAggregateRoot <User>{
         this.studentInCourses = new HashSet<>();
     }
 
-    public User(String userName, String password){
-        this.userName = userName;
+    public User(String username, String password){
+        this.username = username;
         this.password = password;
         this.userRoles = new HashSet<>();
         this.studentInCourses = new HashSet<>();
     }
 
-    public User(String userName, String password, List<Role> roles) {
-        this(userName, password);
+    public User(String username, String password, List<Role> roles) {
+        this(username, password);
         addRoles(roles);
     }
 
     //update
     public User updateUserDetails(UpdateUserCommand updateUserCommand){
-        this.userName = updateUserCommand.userName();
+        this.username = updateUserCommand.username();
         this.password = updateUserCommand.password();
 
         return this;

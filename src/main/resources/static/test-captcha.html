@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Prueba CAPTCHA</title>
+    <script src="https://www.google.com/recaptcha/api.js"></script>
+    <style>
+        body { font-family: Arial; margin: 40px; }
+        .container { max-width: 500px; }
+        .form-group { margin: 15px 0; }
+        input, button { padding: 10px; margin: 5px 0; width: 100%; }
+        button { background: #007bff; color: white; border: none; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .result { margin: 20px 0; padding: 15px; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .token { word-break: break-all; font-size: 12px; background: #f8f9fa; padding: 10px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>🔒 Prueba de Endpoints CAPTCHA</h2>
+
+    <!-- Paso 1: Obtener token de CAPTCHA -->
+    <div class="form-group">
+        <h3>1. Completa el CAPTCHA:</h3>
+        <div class="g-recaptcha"
+             data-sitekey="6Lf8hBksAAAAAG6ZXJHjn8uW0oMN4yET8bq3ZcEP">
+        </div>
+        <button onclick="showToken()">Mostrar Token</button>
+        <div id="tokenDisplay" class="token" style="display:none;"></div>
+    </div>
+
+    <!-- Paso 2: Probar /verify -->
+    <div class="form-group">
+        <h3>2. Probar /api/captcha/verify:</h3>
+        <button onclick="testVerify()">Probar Verificación</button>
+        <div id="verifyResult"></div>
+    </div>
+
+    <!-- Paso 3: Probar /submit-form -->
+    <div class="form-group">
+        <h3>3. Probar /api/captcha/submit-form:</h3>
+        <input type="text" id="name" placeholder="Nombre" value="Juan Perez">
+        <input type="email" id="email" placeholder="Email" value="juan@test.com">
+        <button onclick="testSubmitForm()">Enviar Formulario</button>
+        <div id="submitResult"></div>
+    </div>
+</div>
+
+<script>
+    function showToken() {
+        const token = grecaptcha.getResponse();
+        const tokenDisplay = document.getElementById('tokenDisplay');
+
+        if (token) {
+            tokenDisplay.innerHTML = `<strong>Token:</strong> ${token}`;
+            tokenDisplay.style.display = 'block';
+
+            // Copiar al portapapeles
+            navigator.clipboard.writeText(token).then(() => {
+                alert('Token copiado al portapapeles!');
+            });
+        } else {
+            alert('Primero completa el CAPTCHA');
+        }
+    }
+
+    async function testVerify() {
+        const token = grecaptcha.getResponse();
+        if (!token) {
+            alert('Primero completa el CAPTCHA');
+            return;
+        }
+
+        try {
+            const formData = new FormData();
+            formData.append('g-recaptcha-response', token);
+
+            const response = await fetch('/api/captcha/verify', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            const resultDiv = document.getElementById('verifyResult');
+            resultDiv.innerHTML = `<div class="result ${response.ok ? 'success' : 'error'}">
+                    <strong>Status:</strong> ${response.status}<br>
+                    <strong>Respuesta:</strong> ${JSON.stringify(result, null, 2)}
+                </div>`;
+
+        } catch (error) {
+            document.getElementById('verifyResult').innerHTML =
+                `<div class="result error">Error: ${error}</div>`;
+        }
+    }
+
+    async function testSubmitForm() {
+        const token = grecaptcha.getResponse();
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email').value;
+
+        if (!token) {
+            alert('Primero completa el CAPTCHA');
+            return;
+        }
+
+        try {
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('email', email);
+            formData.append('g-recaptcha-response', token);
+
+            const response = await fetch('/api/captcha/submit-form', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            const resultDiv = document.getElementById('submitResult');
+            resultDiv.innerHTML = `<div class="result ${response.ok ? 'success' : 'error'}">
+                    <strong>Status:</strong> ${response.status}<br>
+                    <strong>Respuesta:</strong> ${JSON.stringify(result, null, 2)}
+                </div>`;
+
+        } catch (error) {
+            document.getElementById('submitResult').innerHTML =
+                `<div class="result error">Error: ${error}</div>`;
+        }
+    }
+</script>
+</body>
+</html>

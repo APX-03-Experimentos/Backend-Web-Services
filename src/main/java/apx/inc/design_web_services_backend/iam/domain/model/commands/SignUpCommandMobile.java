@@ -5,13 +5,12 @@ import apx.inc.design_web_services_backend.iam.domain.model.valueobjects.Roles;
 import java.util.List;
 import java.util.Set;
 
-public record SignUpCommand(
+public record SignUpCommandMobile(
         String username,
         String password,
-        List<Roles> roles,
-        String recaptchaToken
+        List<Roles> roles
 ) {
-    public SignUpCommand {
+    public SignUpCommandMobile {
         if (username==null||username.isBlank()) {
             throw new IllegalArgumentException("Username cannot be empty");
         }

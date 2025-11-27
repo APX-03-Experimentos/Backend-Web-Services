@@ -9,7 +9,7 @@ public class UserResourceFromEntityAssembler {
     public static UserResource toResourceFromEntity(User user) {
         return new UserResource(
                 user.getId(),
-                user.getUserName(),
+                user.getUsername(),
                 user.getUserRoles().stream().map(Role::getName).toList(),
                 user.getStudentInCourses().stream().map(
                         course -> new CourseResource(
